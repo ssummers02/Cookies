@@ -34,20 +34,20 @@ func CreateTask(task Task) error {
 	return db.Create(&task).Error
 }
 
-func GetTask(id uint) Task {
+func GetTask(id uint) (Task, error) {
 	var task Task
-	db.First(&task, id)
-	return task
+	res := db.First(&task, id)
+	return task, res.Error
 }
 
-func GetAllTasks() []Task {
+func GetAllTasks() ([]Task, error) {
 	var tasks []Task
-	db.Limit(limit).Order("created_at, room").Find(&tasks)
-	return tasks
+	res := db.Limit(limit).Order("created_at, room").Find(&tasks)
+	return tasks, res.Error
 }
 
-func GetTaskInRoom(room uint) []Task {
+func GetTaskInRoom(room uint) ([]Task, error) {
 	var tasks []Task
-	db.Where(&Task{Room: room}, "room").Order("created_at, room").Find(&tasks)
-	return tasks
+	res := db.Where(&Task{Room: room}, "room").Order("created_at, room").Find(&tasks)
+	return tasks, res.Error
 }

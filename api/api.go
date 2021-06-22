@@ -11,7 +11,12 @@ type Response struct {
 }
 
 func GetTasksTable(w http.ResponseWriter, r *http.Request) {
-	resp := Response{Tasks: db.GetAllTasks()}
+	tasks, err := db.GetAllTasks()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+	resp := Response{Tasks: tasks}
 	js, err := json.Marshal(resp)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

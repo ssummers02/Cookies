@@ -13,8 +13,10 @@ func main() {
 		os.Mkdir("temp", 0777)
 	}
 	db.InitDB()
-	http.HandleFunc("/", api.GetTasksTable)
-	http.HandleFunc("/add_task", api.NewTask)
+	router := http.NewServeMux()
+	router.HandleFunc("/", api.GetTasksTable)
+	router.HandleFunc("/add_task", api.NewTask)
+	router.HandleFunc("/users/{id}", users.showHandler)
 	http.ListenAndServe(":8080", nil)
 	bot.Start()
 }
