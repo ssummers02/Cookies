@@ -8,6 +8,7 @@ import (
 	"github.com/SevereCloud/vksdk/v2/api/params"
 	"github.com/SevereCloud/vksdk/v2/events"
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
+	"github.com/SevereCloud/vksdk/v2/object"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -16,10 +17,60 @@ import (
 	"time"
 )
 
+func createGeneralKeyboard() *object.MessagesKeyboard {
+	k := object.NewMessagesKeyboard(true)
+
+	k.AddRow()
+	k.AddTextButton(`Личный кабинет`, ``, `primary`)
+	k.AddTextButton(`Сделать заказ`, ``, `primary`)
+
+	return k
+}
+func createDelete(ar []int) *object.MessagesKeyboard {
+	k := object.NewMessagesKeyboardInline()
+	for _, value := range ar {
+		k.AddRow()
+		k.AddTextButton(string(rune(value)), ``, `primary`)
+	}
+
+	return k
+}
+
+func createPersonalAreaKeyboard() *object.MessagesKeyboard {
+	k := object.NewMessagesKeyboardInline()
+
+	k.AddRow()
+	k.AddTextButton(`Изменить кабинет`, ``, `primary`)
+
+	k.AddRow()
+	k.AddTextButton(`История заказов`, ``, `secondary`)
+
+	k.AddRow()
+	k.AddTextButton(`Отменить заказ`, ``, `negative`)
+
+	return k
+}
+
 // Отправка сообщения пользователю
 func createAndSendMessages(vk *api.VK, PeerID int, text string) {
 	rand.Seed(time.Now().UnixNano())
 	b := params.NewMessagesSendBuilder()
+
+	b.Message(text)
+	b.RandomID(rand.Intn(2147483647))
+	b.PeerID(PeerID)
+	_, err := vk.MessagesSend(b.Params)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// Отправка сообщения пользователю
+func createAndSendMessagesAndKeyboard(vk *api.VK, PeerID int, text string, k *object.MessagesKeyboard) {
+	rand.Seed(time.Now().UnixNano())
+	b := params.NewMessagesSendBuilder()
+
+	b.Keyboard(k)
 	b.Message(text)
 	b.RandomID(rand.Intn(2147483647))
 	b.PeerID(PeerID)
@@ -95,7 +146,7 @@ func Start() {
 		Message := obj.Message.Text
 		PeerID := obj.Message.PeerID
 
-		log.Printf("New Users: %d:%s", PeerID, Message)
+		log.Printf("New messages: %d:%s", PeerID, Message)
 
 		nameFile := "temp/" + strconv.Itoa(PeerID) + ".json"
 		if !Exists(nameFile) {
@@ -107,14 +158,39 @@ func Start() {
 		log.Print(user)
 
 		if user.Cabinet == 0 && user.LastMessages == "Кабинет" {
-			// Добавить проверку на инт
-			createAndSendMessages(vk, PeerID, "Твой новый кабинет:"+Message)
-			user.Cabinet, _ = strconv.Atoi(Message)
+			cab, err := strconv.Atoi(Message)
+			if err != nil { // если возникла ошибка
+				createAndSendMessages(vk, PeerID, "Неверный кабинет, попробуй еще раз")
+			} else {
+				createAndSendMessagesAndKeyboard(vk, PeerID, "Твой новый кабинет:"+Message, createGeneralKeyboard())
+				user.Cabinet = cab
+			}
 		}
 
 		if user.Cabinet == 0 && user.LastMessages != "Кабинет" {
 			createAndSendMessages(vk, PeerID, "Я тебя не знаю, давай познакомимься поближе\nУкажи номер своего кабинета")
 			user.LastMessages = "Кабинет"
+		}
+		if Message == "Личный кабинет" {
+			user.LastMessages = Message
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Чем я могу тебе помочь?", createPersonalAreaKeyboard())
+		}
+		if Message == "Изменить кабинет" {
+			user.Cabinet = 0
+			user.LastMessages = "Кабинет"
+			createAndSendMessages(vk, PeerID, "Укажи номер своего кабинета")
+		}
+		if Message == "История заказов" {
+			user.LastMessages = Message
+			// отправка истории 5 штук
+
+		}
+
+		if Message == "Отменить заказ" {
+			user.LastMessages = Message
+			// отправка истории 5 штук
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ", createPersonalAreaKeyboard())
+
 		}
 
 		changeUserFile(nameFile, user)
