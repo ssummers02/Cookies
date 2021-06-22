@@ -46,8 +46,8 @@ func GetAllTasks() ([]Task, error) {
 	return tasks, res.Error
 }
 
-func GetTaskInRoom(room uint) ([]Task, error) {
+func GetTaskInRoom(room string) ([]Task, error) {
 	var tasks []Task
-	res := db.Where(&Task{Room: room}, "room").Order("created_at, room").Find(&tasks)
+	res := db.Where("room = ?", room).Order("created_at, room").Find(&tasks)
 	return tasks, res.Error
 }
