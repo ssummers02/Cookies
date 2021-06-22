@@ -10,7 +10,7 @@ import (
 
 var db *gorm.DB
 
-const limit = 100 // TODO: add .env
+var limit int
 
 type Task struct {
 	ID        uint      `gorm:"primaryKey"`
@@ -20,13 +20,14 @@ type Task struct {
 	CreatedAt time.Time `json:"time"`
 }
 
-func InitDB() {
+func InitDB(lim int) {
 	var err error
 	db, err = gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	limit = lim
 	db.AutoMigrate(&Task{})
 }
 
@@ -48,6 +49,6 @@ func GetAllTasks() ([]Task, error) {
 
 func GetTaskInRoom(room string) ([]Task, error) {
 	var tasks []Task
-	res := db.Where("room = ?", room).Order("created_at, room").Find(&tasks)
+	res := db.Limit(limit).Where("room = ?", room).Order("created_at, room").Find(&tasks)
 	return tasks, res.Error
 }
