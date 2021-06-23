@@ -13,12 +13,12 @@ var db *gorm.DB
 var limit int
 
 type Task struct {
-	ID        uint      `gorm:"primaryKey"`
-	UserID    uint      `json:"user,string"`
-	Room      uint      `json:"room,string"`
-	Text      string    `json:"text"`
-	Status    uint      `json:"status,string"` // 1: New, 2: Done // Add if we have time for it)
-	CreatedAt time.Time `json:"time"`
+	ID        uint   `gorm:"primaryKey"`
+	UserID    uint   `json:"user,string"`
+	Room      uint   `json:"room,string"`
+	Text      string `json:"text"`
+	Status    uint   `json:"status,string"` // 1: New, 2: Done // Add if we have time for it)
+	CreatedAt time.Time
 }
 
 func InitDB(lim int) {
@@ -33,6 +33,7 @@ func InitDB(lim int) {
 }
 
 func CreateTask(task Task) error {
+	task.CreatedAt = time.Now()
 	return db.Create(&task).Error
 }
 
