@@ -17,8 +17,8 @@ import (
 	"time"
 )
 
-func createGeneralKeyboard() *object.MessagesKeyboard {
-	k := object.NewMessagesKeyboard(true)
+func createGeneralKeyboard(t bool) *object.MessagesKeyboard {
+	k := object.NewMessagesKeyboard(object.BaseBoolInt(t))
 
 	k.AddRow()
 	k.AddTextButton(`Личный кабинет`, ``, `primary`)
@@ -162,7 +162,7 @@ func Start() {
 			if err != nil { // если возникла ошибка
 				createAndSendMessages(vk, PeerID, "Неверный кабинет, попробуй еще раз")
 			} else {
-				createAndSendMessagesAndKeyboard(vk, PeerID, "Твой новый кабинет:"+Message, createGeneralKeyboard())
+				createAndSendMessagesAndKeyboard(vk, PeerID, "Твой новый кабинет:"+Message, createGeneralKeyboard(true))
 				user.Cabinet = cab
 			}
 		}
@@ -183,14 +183,35 @@ func Start() {
 		if Message == "История заказов" {
 			user.LastMessages = Message
 			// отправка истории 5 штук
+			createAndSendMessagesAndKeyboard(vk, PeerID, "ТУТ ИСТОРИЯ", createGeneralKeyboard(false))
+
+		}
+
+		if user.LastMessages == "Отменить заказ" {
+			user.LastMessages = Message
+			// получаем id и отменяем заказ
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createPersonalAreaKeyboard())
 
 		}
 
 		if Message == "Отменить заказ" {
 			user.LastMessages = Message
 			// отправка истории 5 штук
-			createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ", createPersonalAreaKeyboard())
+			/*			createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ", createPersonalAreaKeyboard())
+			 */createAndSendMessages(vk, PeerID, "ТУТ ИСТОРИЯ с inline кнопками")
 
+		}
+
+		if user.LastMessages == "Заказ" {
+			user.LastMessages = "Заказ"
+			// создать заявку
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, createGeneralKeyboard(false))
+
+		}
+
+		if Message == "Сделать заказ" {
+			user.LastMessages = "Заказ"
+			createAndSendMessages(vk, PeerID, "Напиши что тебе принести")
 		}
 
 		changeUserFile(nameFile, user)
