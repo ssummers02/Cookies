@@ -16,6 +16,7 @@ type Task struct {
 	ID        uint      `gorm:"primaryKey"`
 	UserID    uint      `json:"user,string"`
 	Room      uint      `json:"room,string"`
+	Text      string    `json:"text"`
 	Status    uint      `json:"status,string"` // 1: New, 2: Done // Add if we have time for it)
 	CreatedAt time.Time `json:"time"`
 }
