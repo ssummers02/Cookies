@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-	bot.Start()
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -22,14 +21,16 @@ func main() {
 
 	port := os.Getenv("ADDRESS")
 	limit := os.Getenv("LIMIT")
+	vkKey := os.Getenv("VK_KEY")
+	vkGroup := os.Getenv("VK_GROUP_ID")
 	if _, err := os.Stat("temp"); os.IsNotExist(err) {
 		os.Mkdir("temp", 0777)
 	}
-	lim, err := strconv.Atoi(limit)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	lim, _ := strconv.Atoi(limit)
+	vkGroupId, _ := strconv.Atoi(vkGroup)
+	go func(vkKey string, vkGroupId int) {
+		bot.Start(vkKey, vkGroupId)
+	}(vkKey, vkGroupId)
 	db.InitDB(lim)
 	router := mux.NewRouter()
 	router.HandleFunc("/", api.GetTasksTable).Methods("GET")

@@ -4,17 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/SevereCloud/vksdk/v2/api"
-	"github.com/SevereCloud/vksdk/v2/api/params"
-	"github.com/SevereCloud/vksdk/v2/events"
-	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
-	"github.com/SevereCloud/vksdk/v2/object"
 	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/SevereCloud/vksdk/v2/api"
+	"github.com/SevereCloud/vksdk/v2/api/params"
+	"github.com/SevereCloud/vksdk/v2/events"
+	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
+	"github.com/SevereCloud/vksdk/v2/object"
 )
 
 type Users struct {
@@ -90,9 +91,9 @@ func changeUserFile(nameFile string, users Users) {
 
 	defer file.Close()
 }
-func Start() {
-	vk := api.NewVK("aa6f5be89eb316d1fbdfb1fab2d82a8229aec785fa980bdc51d606e03b36b1ec5f740cee6cd56d132efce")
-	lp, err := longpoll.NewLongPoll(vk, 204006771)
+func Start(key string, groupId int) {
+	vk := api.NewVK(key)
+	lp, err := longpoll.NewLongPoll(vk, groupId)
 	if err != nil {
 		panic(err)
 	}
