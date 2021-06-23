@@ -66,11 +66,7 @@ func NewTask(w http.ResponseWriter, r *http.Request) {
 func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	task_id := vars["id"]
-	taskId, err := strconv.Atoi(task_id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	taskId, _ := strconv.Atoi(task_id)
 	if err := db.DeleteTask(uint(taskId)); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -91,4 +87,25 @@ func PutTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func GetHistory(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID := vars["user_id"]
+	countVar := vars["count"]
+	userId, _ := strconv.Atoi(userID)
+	count, _ := strconv.Atoi(countVar)
+	tasks, err := db.GetUserHistory(uint(userId), count)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	resp := Response{Tasks: tasks}
+	js, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }

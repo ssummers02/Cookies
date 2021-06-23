@@ -33,9 +33,10 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", api.GetTasksTable).Methods("GET")
 	router.HandleFunc("/add_task", api.NewTask).Methods("POST")
-	router.HandleFunc("/room/{id}", api.GetTasksInRoom).Methods("GET")
-	router.HandleFunc("/task/{id}", api.DeleteTask).Methods("DELETE")
-	router.HandleFunc("/task/{id}", api.PutTask).Methods("PUT")
+	router.HandleFunc("/room/{id:[0-9]+}", api.GetTasksInRoom).Methods("GET")
+	router.HandleFunc("/task/{id:[0-9]+}", api.DeleteTask).Methods("DELETE")
+	router.HandleFunc("/task/{id:[0-9]+}", api.PutTask).Methods("PUT")
+	router.HandleFunc("/user/{user_id:[0-9]+}/{count:[0-9]+}", api.GetHistory).Methods("GET")
 
 	srv := &http.Server{
 		Handler: router,

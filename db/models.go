@@ -51,6 +51,12 @@ func GetAllTasks() ([]Task, error) {
 	return tasks, res.Error
 }
 
+func GetUserHistory(user_id uint, count_tasks int) ([]Task, error) {
+	var tasks []Task
+	res := db.Limit(count_tasks).Where("user_id = ?", user_id).Order("created_at, room").Find(&tasks)
+	return tasks, res.Error
+}
+
 func GetTaskInRoom(room string) ([]Task, error) {
 	var tasks []Task
 	res := db.Limit(limit).Where("room = ?", room).Order("created_at, room").Find(&tasks)
