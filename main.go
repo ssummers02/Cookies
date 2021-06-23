@@ -14,6 +14,7 @@ import (
 )
 
 func main() {
+	bot.Start()
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -43,5 +44,4 @@ func main() {
 		Addr:    port,
 	}
 	log.Fatal(srv.ListenAndServe())
-	bot.Start()
 }
