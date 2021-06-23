@@ -20,6 +20,7 @@ func main() {
 	}
 
 	port := os.Getenv("ADDRESS")
+	dbName := os.Getenv("DATABASE")
 	limit := os.Getenv("LIMIT")
 	vkKey := os.Getenv("VK_KEY")
 	vkGroup := os.Getenv("VK_GROUP_ID")
@@ -31,7 +32,7 @@ func main() {
 	go func(vkKey string, vkGroupId int) {
 		bot.Start(vkKey, vkGroupId)
 	}(vkKey, vkGroupId)
-	db.InitDB(lim)
+	db.InitDB(dbName, lim)
 	router := mux.NewRouter()
 	router.HandleFunc("/", api.GetTasksTable).Methods("GET")
 	router.HandleFunc("/add_task", api.NewTask).Methods("POST")

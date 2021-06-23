@@ -21,9 +21,9 @@ type Task struct {
 	CreatedAt time.Time
 }
 
-func InitDB(lim int) {
+func InitDB(dbName string, lim int) {
 	var err error
-	db, err = gorm.Open(sqlite.Open("data.db"), &gorm.Config{})
+	db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 		return
