@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"ssummers02/Cookies/db"
 	"strconv"
@@ -51,12 +52,13 @@ func GetTasksInRoom(w http.ResponseWriter, r *http.Request) {
 
 func NewTask(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	decoder := json.NewDecoder(r.Body)
 	var task db.Task
-	if err := decoder.Decode(&task); err != nil {
+	byteVale, err := ioutil.ReadAll(r.Body)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	json.Unmarshal(byteVale, &task)
 	if err := db.CreateTask(task); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -76,9 +78,11 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 // PutTask: PUT handler for task model.
 func PutTask(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	decoder := json.NewDecoder(r.Body)
 	var task db.Task
-	if err := decoder.Decode(&task); err != nil {
+	byteVale, err := ioutil.ReadAll(r.Body)
+
+	json.Unmarshal(byteVale, &task)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

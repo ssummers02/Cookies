@@ -14,10 +14,10 @@ var limit int
 
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
-	UserID    uint   `json:"user,string"`
-	Room      uint   `json:"room,string"`
+	UserID    int    `json:"user"`
+	Room      int    `json:"room"`
 	Text      string `json:"text"`
-	Status    uint   `json:"status,string"` // 1: New, 2: Done // Add if we have time for it)
+	Status    int    `json:"status"` // 1: New, 2: Done // Add if we have time for it)
 	CreatedAt time.Time
 }
 
