@@ -17,38 +17,9 @@ import (
 	"time"
 )
 
-func createGeneralKeyboard(t bool) *object.MessagesKeyboard {
-	k := object.NewMessagesKeyboard(object.BaseBoolInt(t))
-
-	k.AddRow()
-	k.AddTextButton(`Личный кабинет`, ``, `primary`)
-	k.AddTextButton(`Сделать заказ`, ``, `primary`)
-
-	return k
-}
-func createDelete(ar []int) *object.MessagesKeyboard {
-	k := object.NewMessagesKeyboardInline()
-	for _, value := range ar {
-		k.AddRow()
-		k.AddTextButton(string(rune(value)), ``, `primary`)
-	}
-
-	return k
-}
-
-func createPersonalAreaKeyboard() *object.MessagesKeyboard {
-	k := object.NewMessagesKeyboardInline()
-
-	k.AddRow()
-	k.AddTextButton(`Изменить кабинет`, ``, `primary`)
-
-	k.AddRow()
-	k.AddTextButton(`История заказов`, ``, `secondary`)
-
-	k.AddRow()
-	k.AddTextButton(`Отменить заказ`, ``, `negative`)
-
-	return k
+type Users struct {
+	LastMessages string `json:"LastMessages"`
+	Cabinet      int    `json:"Cabinet"`
 }
 
 // Отправка сообщения пользователю
@@ -78,21 +49,6 @@ func createAndSendMessagesAndKeyboard(vk *api.VK, PeerID int, text string, k *ob
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-type Users struct {
-	LastMessages string `json:"LastMessages"`
-	Cabinet      int    `json:"Cabinet"`
-}
-
-// Exists reports whether the named file or directory exists.
-func Exists(name string) bool {
-	if _, err := os.Stat(name); err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-	}
-	return true
 }
 
 // Создание файла пользователя
@@ -190,7 +146,7 @@ func Start() {
 		if user.LastMessages == "Отменить заказ" {
 			user.LastMessages = Message
 			// получаем id и отменяем заказ
-			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createPersonalAreaKeyboard())
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createGeneralKeyboard(false))
 
 		}
 
@@ -203,7 +159,7 @@ func Start() {
 		}
 
 		if user.LastMessages == "Заказ" {
-			user.LastMessages = "Заказ"
+			user.LastMessages = "Заказ создан"
 			// создать заявку
 			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, createGeneralKeyboard(false))
 
