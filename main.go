@@ -31,9 +31,11 @@ func main() {
 	}
 	db.InitDB(lim)
 	router := mux.NewRouter()
-	router.HandleFunc("/", api.GetTasksTable)
-	router.HandleFunc("/add_task", api.NewTask)
-	router.HandleFunc("/room/{id}", api.GetTasksInRoom)
+	router.HandleFunc("/", api.GetTasksTable).Methods("GET")
+	router.HandleFunc("/add_task", api.NewTask).Methods("POST")
+	router.HandleFunc("/room/{id}", api.GetTasksInRoom).Methods("GET")
+	router.HandleFunc("/task/{id}", api.DeleteTask).Methods("DELETE")
+	router.HandleFunc("/task/{id}", api.PutTask).Methods("PUT")
 
 	srv := &http.Server{
 		Handler: router,

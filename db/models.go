@@ -35,6 +35,10 @@ func CreateTask(task Task) error {
 	return db.Create(&task).Error
 }
 
+func UpdateTask(task Task) error {
+	return db.Model(&task).Where("ID = ?", task.ID).Updates(task).Error
+}
+
 func GetTask(id uint) (Task, error) {
 	var task Task
 	res := db.First(&task, id)
@@ -51,4 +55,12 @@ func GetTaskInRoom(room string) ([]Task, error) {
 	var tasks []Task
 	res := db.Limit(limit).Where("room = ?", room).Order("created_at, room").Find(&tasks)
 	return tasks, res.Error
+}
+
+func DeleteTask(id uint) error {
+	task, err := GetTask(uint(id))
+	if err != nil {
+		return err
+	}
+	return db.Delete(&task).Error
 }

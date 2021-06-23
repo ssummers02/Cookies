@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"ssummers02/Cookies/db"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -60,4 +61,34 @@ func NewTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+}
+
+func DeleteTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	task_id := vars["id"]
+	taskId, err := strconv.Atoi(task_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := db.DeleteTask(uint(taskId)); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+}
+
+// PutTask: PUT handler for task model.
+func PutTask(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	decoder := json.NewDecoder(r.Body)
+	var task db.Task
+	if err := decoder.Decode(&task); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := db.UpdateTask(task); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 }
