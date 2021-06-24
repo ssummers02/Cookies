@@ -10,9 +10,10 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"ssummers02/Cookies/db"
 	"strconv"
 	"time"
+
+	"ssummers02/Cookies/db"
 
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/api/params"
@@ -86,6 +87,7 @@ func findOutTheStatus(n uint) string {
 	}
 	return ""
 }
+
 func OpenUserFile(nameFile string) Users {
 	var user Users
 
@@ -94,25 +96,69 @@ func OpenUserFile(nameFile string) Users {
 		fmt.Println(err)
 	}
 	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile) //Считывание и раскодирование в json
+	byteValue, _ := ioutil.ReadAll(jsonFile) // Считывание и раскодирование в json
 	json.Unmarshal(byteValue, &user)
 	return user
 
 }
-func changeUserFile(nameFile string, users Users) {
-	file, err := os.Create(nameFile) // создаем файл
+func GetHistory(port string, PeerID int) ArrayTask {
+	var userHistory ArrayTask
 
-	if err != nil { // если возникла ошибка
-		log.Print("Unable to create file:", err)
+	resp, err := http.Get("http://" + port + "/user/" + strconv.Itoa(PeerID) + "/5")
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	e, err := json.Marshal(users)
-	file.WriteString(string(e))
+	defer resp.Body.Close()
 
-	defer file.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.Unmarshal(body, &userHistory)
+
+	return userHistory
 }
 
-func messageHandling(vk *api.VK, userStatus Users, Message string, PeerID int) Users {
+func sendHistory(vk *api.VK, port string, PeerID int) {
+	userHistory := GetHistory(port, PeerID)
+
+	if len(userHistory.Tasks) == 0 {
+		createAndSendMessagesAndKeyboard(vk, PeerID, "Заказов нет", createGeneralKeyboard(false))
+		return
+	}
+	for i := 0; i < len(userHistory.Tasks); i++ {
+		createMessage := "№" + strconv.Itoa(int(userHistory.Tasks[i].ID)) + ": " + userHistory.Tasks[i].Text + " - " + findOutTheStatus(userHistory.Tasks[i].Status) + "\n"
+		createAndSendMessagesAndKeyboard(vk, PeerID, createMessage, createGeneralKeyboard(false))
+	}
+}
+func SelectDeleteHistory(vk *api.VK, port string, PeerID int) {
+	userHistory := GetHistory(port, PeerID)
+
+	if len(userHistory.Tasks) == 0 {
+		createAndSendMessagesAndKeyboard(vk, PeerID, "Заказов нет", createGeneralKeyboard(false))
+		return
+	}
+	k := object.NewMessagesKeyboardInline()
+	k.AddRow()
+
+	for i := 0; i < len(userHistory.Tasks); i++ {
+		id := strconv.Itoa(int(userHistory.Tasks[i].ID))
+		k.AddTextButton(id, ``, `primary`)
+		createMessage := "№" + id + ": " + userHistory.Tasks[i].Text + " - " + findOutTheStatus(userHistory.Tasks[i].Status) + "\n"
+		createAndSendMessages(vk, PeerID, createMessage)
+	}
+	k.AddRow()
+
+	k.AddTextButton(`Вернуться назад`, ``, `positive`)
+
+	createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ который хочешь отменить", k)
+}
+
+func messageHandling(vk *api.VK, nameFile string, Message string, PeerID int) Users {
+	userStatus := OpenUserFile(nameFile)
 
 	port := os.Getenv("ADDRESS")
 
@@ -147,44 +193,31 @@ func messageHandling(vk *api.VK, userStatus Users, Message string, PeerID int) U
 	}
 	if Message == "История заказов" {
 		userStatus.LastMessages = Message
-		// отправка истории 5 штук
-
-		resp, err := http.Get("http://" + port + "/user/" + strconv.Itoa(PeerID) + "/5")
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer resp.Body.Close()
-
-		body, err := ioutil.ReadAll(resp.Body)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-		var userHistory ArrayTask
-		json.Unmarshal(body, &userHistory)
-		log.Print(userHistory)
-		createMessage := ""
-		for i := 0; i < len(userHistory.Tasks); i++ {
-			createMessage = createMessage + "№" + strconv.Itoa(int(userHistory.Tasks[i].ID)) + ": " + userHistory.Tasks[i].Text + "-" + findOutTheStatus(userHistory.Tasks[i].Status) + "\n"
-		}
-		createAndSendMessagesAndKeyboard(vk, PeerID, createMessage, createGeneralKeyboard(false))
+		sendHistory(vk, port, PeerID)
+		createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери с чем тебе помочь", createGeneralKeyboard(true))
 		return userStatus
 	}
 
 	if userStatus.LastMessages == "Отменить заказ" {
 		userStatus.LastMessages = Message
-		// получаем id и отменяем заказ
+
+		req, err := http.NewRequest(http.MethodDelete, "http://"+port+"/task/"+Message, nil)
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = http.DefaultClient.Do(req)
+
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createGeneralKeyboard(false))
 		return userStatus
 	}
-
+	if Message == "Вернуться назад" {
+		userStatus.LastMessages = Message
+		createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери с чем тебе помочь", createGeneralKeyboard(true))
+		return userStatus
+	}
 	if Message == "Отменить заказ" {
 		userStatus.LastMessages = Message
-		// отправка истории 5 штук
-		/*			createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ", createPersonalAreaKeyboard())
-		 */createAndSendMessages(vk, PeerID, "ТУТ ИСТОРИЯ с inline кнопками")
+		SelectDeleteHistory(vk, port, PeerID)
 		return userStatus
 	}
 
@@ -214,6 +247,7 @@ func messageHandling(vk *api.VK, userStatus Users, Message string, PeerID int) U
 	return userStatus
 
 }
+
 func Start(key string, groupId int) {
 	vk := api.NewVK(key)
 	lp, err := longpoll.NewLongPoll(vk, groupId)
@@ -221,7 +255,7 @@ func Start(key string, groupId int) {
 		panic(err)
 	}
 
-	//Обработка новых сообщений
+	// Обработка новых сообщений
 	lp.MessageNew(func(ctx context.Context, obj events.MessageNewObject) {
 		Message := obj.Message.Text
 		PeerID := obj.Message.PeerID
@@ -234,8 +268,7 @@ func Start(key string, groupId int) {
 			createAndSendMessages(vk, PeerID, "Привет! Я Печенька")
 
 		}
-		userFile := OpenUserFile(nameFile)
-		userFile = messageHandling(vk, userFile, Message, PeerID)
+		userFile := messageHandling(vk, nameFile, Message, PeerID)
 		changeUserFile(nameFile, userFile)
 
 	})

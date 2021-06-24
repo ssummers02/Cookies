@@ -1,8 +1,11 @@
 package bot
 
 import (
-	"github.com/SevereCloud/vksdk/v2/object"
+	"encoding/json"
+	"log"
 	"os"
+
+	"github.com/SevereCloud/vksdk/v2/object"
 )
 
 func createPersonalAreaKeyboard() *object.MessagesKeyboard {
@@ -38,12 +41,15 @@ func Exists(name string) bool {
 	}
 	return true
 }
-func createDelete(ar []int) *object.MessagesKeyboard {
-	k := object.NewMessagesKeyboardInline()
-	for _, value := range ar {
-		k.AddRow()
-		k.AddTextButton(string(rune(value)), ``, `primary`)
+func changeUserFile(nameFile string, users Users) {
+	file, err := os.Create(nameFile) // создаем файл
+
+	if err != nil { // если возникла ошибка
+		log.Print("Unable to create file:", err)
 	}
 
-	return k
+	e, err := json.Marshal(users)
+	file.WriteString(string(e))
+
+	defer file.Close()
 }

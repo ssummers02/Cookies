@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"ssummers02/Cookies/db"
 	"strconv"
+
+	"ssummers02/Cookies/db"
 
 	"github.com/gorilla/mux"
 )
