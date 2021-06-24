@@ -20,6 +20,15 @@ type Task struct {
 	Status    uint   `json:"status"` // 1: New, 2: Done // Add if we have time for it)
 	CreatedAt time.Time
 }
+type Users struct {
+	UserID       int    `json:"user"`
+	LastMessages string `json:"LastMessages"`
+	Cabinet      int    `json:"Cabinet"`
+}
+
+type ArrayTask struct {
+	Tasks []Task
+}
 
 func InitDB(dbName string, lim int) {
 	var err error
@@ -30,15 +39,29 @@ func InitDB(dbName string, lim int) {
 	}
 	limit = lim
 	db.AutoMigrate(&Task{})
+	db.AutoMigrate(&Users{})
+
 }
 
 func CreateTask(task Task) error {
 	task.CreatedAt = time.Now()
 	return db.Create(&task).Error
 }
+func CreateUsers(user Users) error {
+	return db.Create(&user).Error
+}
+
+func UpdateUsers(user Users) error {
+	return db.Save(&user).Error
+}
 
 func UpdateTask(task Task) error {
 	return db.Save(&task).Error
+}
+func GetUsers(id int) (Users, error) {
+	var user Users
+	res := db.First(&user, id)
+	return user, res.Error
 }
 
 func ChangeStatus(taskId string, status string) error {

@@ -34,8 +34,8 @@ func GetTasksTable(w http.ResponseWriter, r *http.Request) {
 
 func GetTasksInRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	room_id := vars["id"]
-	tasks, err := db.GetTaskInRoom(room_id)
+	roomId := vars["id"]
+	tasks, err := db.GetTaskInRoom(roomId)
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -76,7 +76,7 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PutTask: PUT handler for task model.
+// PutTask : PUT handler for task model.
 func PutTask(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var task db.Task

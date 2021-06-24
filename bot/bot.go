@@ -22,15 +22,6 @@ import (
 	"github.com/SevereCloud/vksdk/v2/object"
 )
 
-type Users struct {
-	LastMessages string `json:"LastMessages"`
-	Cabinet      int    `json:"Cabinet"`
-}
-
-type ArrayTask struct {
-	Tasks []db.Task
-}
-
 // Отправка сообщения пользователю
 func createAndSendMessages(vk *api.VK, PeerID int, text string) {
 	rand.Seed(time.Now().UnixNano())
@@ -60,20 +51,6 @@ func createAndSendMessagesAndKeyboard(vk *api.VK, PeerID int, text string, k *ob
 	}
 }
 
-// Создание файла пользователя
-func createNewUser(nameFile string) {
-	file, err := os.Create(nameFile) // создаем файл
-
-	if err != nil { // если возникла ошибка
-		log.Print("Unable to create file:", err)
-	}
-	emp := &Users{"", 0} // default значения
-	e, err := json.Marshal(emp)
-	file.WriteString(string(e))
-
-	defer file.Close()
-}
-
 func findOutTheStatus(n uint) string {
 	switch n {
 	case 0:
@@ -88,8 +65,8 @@ func findOutTheStatus(n uint) string {
 	return ""
 }
 
-func OpenUserFile(nameFile string) Users {
-	var user Users
+func OpenUserFile(nameFile string) db.Users {
+	var user db.Users
 
 	jsonFile, err := os.Open(nameFile) // Открытие jsonFile
 	if err != nil {
@@ -101,8 +78,8 @@ func OpenUserFile(nameFile string) Users {
 	return user
 
 }
-func GetHistory(port string, PeerID int) ArrayTask {
-	var userHistory ArrayTask
+func GetHistory(port string, PeerID int) db.ArrayTask {
+	var userHistory db.ArrayTask
 
 	resp, err := http.Get("http://" + port + "/user/" + strconv.Itoa(PeerID) + "/5")
 
@@ -157,8 +134,8 @@ func SelectDeleteHistory(vk *api.VK, port string, PeerID int) {
 	createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ который хочешь отменить", k)
 }
 
-func messageHandling(vk *api.VK, nameFile string, Message string, PeerID int) Users {
-	userStatus := OpenUserFile(nameFile)
+func messageHandling(vk *api.VK, Message string, PeerID int) db.Users {
+	userStatus, _ := db.GetUsers(PeerID)
 
 	port := os.Getenv("ADDRESS")
 
@@ -262,14 +239,14 @@ func Start(key string, groupId int) {
 
 		log.Printf("New messages: %d:%s", PeerID, Message)
 
-		nameFile := "temp/" + strconv.Itoa(PeerID) + ".json"
-		if !Exists(nameFile) {
-			createNewUser(nameFile)
+		_, err := db.GetUsers(PeerID)
+		if err != nil {
+			db.CreateUsers(db.Users{UserID: PeerID})
 			createAndSendMessages(vk, PeerID, "Привет! Я Печенька")
-
 		}
-		userFile := messageHandling(vk, nameFile, Message, PeerID)
-		changeUserFile(nameFile, userFile)
+
+		userFile := messageHandling(vk, Message, PeerID)
+		db.UpdateUsers(userFile)
 
 	})
 

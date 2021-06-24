@@ -4,10 +4,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+
 	"ssummers02/Cookies/api"
 	"ssummers02/Cookies/bot"
 	"ssummers02/Cookies/db"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
