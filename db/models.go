@@ -23,7 +23,7 @@ type Task struct {
 type Users struct {
 	UserID       int    `json:"user"`
 	LastMessages string `json:"LastMessages"`
-	Cabinet      int    `json:"Cabinet"`
+	Room         int    `json:"Room"`
 }
 
 type ArrayTask struct {
@@ -51,17 +51,21 @@ func CreateUsers(user Users) error {
 	return db.Create(&user).Error
 }
 
-func UpdateUsers(user Users) error {
-	return db.Save(&user).Error
-}
-
 func UpdateTask(task Task) error {
 	return db.Save(&task).Error
 }
+
 func GetUsers(id int) (Users, error) {
 	var user Users
 	res := db.First(&user, id)
 	return user, res.Error
+}
+func ChangeRoom(id int, n int) error {
+	return db.Model(&Users{}).Where("user_id = ?", id).Update("room", n).Error
+}
+
+func ChangeMessage(id int, s string) error {
+	return db.Model(&Users{}).Where("user_id = ?", id).Update("last_messages", s).Error
 }
 
 func ChangeStatus(taskId string, status string) error {

@@ -134,49 +134,43 @@ func SelectDeleteHistory(vk *api.VK, port string, PeerID int) {
 	createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ который хочешь отменить", k)
 }
 
-func messageHandling(vk *api.VK, Message string, PeerID int) db.Users {
+func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	userStatus, _ := db.GetUsers(PeerID)
 
 	port := os.Getenv("ADDRESS")
 
-	if userStatus.Cabinet == 0 && userStatus.LastMessages == "Кабинет" {
-		cab, err := strconv.Atoi(Message)
+	if userStatus.Room == 0 && userStatus.LastMessages == "Кабинет" {
+		room, err := strconv.Atoi(Message)
 		if err != nil { // если возникла ошибка
 			createAndSendMessages(vk, PeerID, "Неверный кабинет, попробуй еще раз")
 		} else {
-			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой новый кабинет:"+Message, createGeneralKeyboard(true))
-			userStatus.Cabinet = cab
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой новый кабинет:"+strconv.Itoa(room), createGeneralKeyboard(true))
+			db.ChangeRoom(PeerID, room)
 		}
-		return userStatus
+		return ""
 	}
 
-	if userStatus.Cabinet == 0 && userStatus.LastMessages != "Кабинет" {
+	if userStatus.Room == 0 && userStatus.LastMessages != "Кабинет" {
 		createAndSendMessages(vk, PeerID, "Я тебя не знаю, давай познакомимься поближе\nУкажи номер своего кабинета")
-		userStatus.LastMessages = "Кабинет"
-		return userStatus
-
+		return "Кабинет"
 	}
 	if Message == "Личный кабинет" {
-		userStatus.LastMessages = Message
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Чем я могу тебе помочь?", createPersonalAreaKeyboard())
-		return userStatus
+		return Message
 	}
 	if Message == "Изменить кабинет" {
-		userStatus.Cabinet = 0
-		userStatus.LastMessages = "Кабинет"
+		db.ChangeRoom(PeerID, 0)
 		createAndSendMessages(vk, PeerID, "Укажи номер своего кабинета")
-		return userStatus
+		return "Кабинет"
 
 	}
 	if Message == "История заказов" {
-		userStatus.LastMessages = Message
 		sendHistory(vk, port, PeerID)
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери с чем тебе помочь", createGeneralKeyboard(true))
-		return userStatus
+		return Message
 	}
 
 	if userStatus.LastMessages == "Отменить заказ" {
-		userStatus.LastMessages = Message
 
 		req, err := http.NewRequest(http.MethodDelete, "http://"+port+"/task/"+Message, nil)
 		if err != nil {
@@ -185,23 +179,20 @@ func messageHandling(vk *api.VK, Message string, PeerID int) db.Users {
 		_, err = http.DefaultClient.Do(req)
 
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createGeneralKeyboard(false))
-		return userStatus
+		return Message
 	}
 	if Message == "Вернуться назад" {
-		userStatus.LastMessages = Message
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери с чем тебе помочь", createGeneralKeyboard(true))
-		return userStatus
+		return Message
 	}
 	if Message == "Отменить заказ" {
-		userStatus.LastMessages = Message
 		SelectDeleteHistory(vk, port, PeerID)
-		return userStatus
+		return Message
 	}
 
 	if userStatus.LastMessages == "Заказ" && Message != "Сделать заказ" {
-		userStatus.LastMessages = "Заказ создан"
 		// создать заявку
-		emp := &db.Task{UserID: uint(PeerID), Room: uint(userStatus.Cabinet), Text: Message} // default значения
+		emp := &db.Task{UserID: uint(PeerID), Room: uint(userStatus.Room), Text: Message} // default значения
 		jsonData, _ := json.Marshal(emp)
 
 		_, err := http.Post("http://"+port+"/add_task", "application/json",
@@ -212,16 +203,15 @@ func messageHandling(vk *api.VK, Message string, PeerID int) db.Users {
 		}
 
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, createGeneralKeyboard(false))
-		return userStatus
+		return "Заказ создан"
 
 	}
 
 	if Message == "Сделать заказ" {
-		userStatus.LastMessages = "Заказ"
 		createAndSendMessages(vk, PeerID, "Напиши что тебе принести")
-		return userStatus
+		return "Заказ"
 	}
-	return userStatus
+	return ""
 
 }
 
@@ -246,7 +236,7 @@ func Start(key string, groupId int) {
 		}
 
 		userFile := messageHandling(vk, Message, PeerID)
-		db.UpdateUsers(userFile)
+		db.ChangeMessage(PeerID, userFile)
 
 	})
 
