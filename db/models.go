@@ -38,7 +38,11 @@ func CreateTask(task Task) error {
 }
 
 func UpdateTask(task Task) error {
-	return db.Model(&task).Where("ID = ?", task.ID).Updates(task).Error
+	return db.Save(&task).Error
+}
+
+func ChangeStatus(taskId string, status string) error {
+	return db.Model(&Task{}).Where("id = ?", taskId).Update("status", status).Error
 }
 
 func GetTask(id uint) (Task, error) {
@@ -53,9 +57,9 @@ func GetAllTasks() ([]Task, error) {
 	return tasks, res.Error
 }
 
-func GetUserHistory(user_id uint, count_tasks int) ([]Task, error) {
+func GetUserHistory(userId uint, countTasks int) ([]Task, error) {
 	var tasks []Task
-	res := db.Limit(count_tasks).Where("user_id = ?", user_id).Order("created_at, room").Find(&tasks)
+	res := db.Limit(countTasks).Where("user_id = ?", userId).Order("created_at, room").Find(&tasks)
 	return tasks, res.Error
 }
 

@@ -113,3 +113,12 @@ func GetHistory(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 }
+
+func ChangeStatus(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	newStatus := vars["status"]
+	taskId := vars["task_id"]
+	if err := db.ChangeStatus(taskId, newStatus); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}

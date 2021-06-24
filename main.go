@@ -40,6 +40,7 @@ func main() {
 	router.HandleFunc("/task/{id:[0-9]+}", api.DeleteTask).Methods("DELETE")
 	router.HandleFunc("/task/{id:[0-9]+}", api.PutTask).Methods("PUT")
 	router.HandleFunc("/user/{user_id:[0-9]+}/{count:[0-9]+}", api.GetHistory).Methods("GET")
+	router.HandleFunc("/task/{task_id:[0-9]+}/{status:[0-9]+}", api.ChangeStatus).Methods("PUT")
 
 	srv := &http.Server{
 		Handler: router,
