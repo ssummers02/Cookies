@@ -2,11 +2,14 @@
 ## Build and run
 ### ENV
 Create .env file with 2 variables: ADDRESS and LIMIT, where ADDRESS - address on which will be hosted, LIMIT - maximum count of tasks in GET requests result
-
+vk api for bots https://vk.com/dev/bots_docs
 Example:
 ```
 ADDRESS=127.0.0.1:8080
-LIMIT=2
+LIMIT=10
+VK_KEY=token
+VK_GROUP_ID=123
+DATABASE=data.db
 ``` 
 ### Build
 For build use command in progect directory:
