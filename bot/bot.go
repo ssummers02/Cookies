@@ -1,13 +1,16 @@
 package bot
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
+	"ssummers02/Cookies/db"
 	"strconv"
 	"time"
 
@@ -97,6 +100,7 @@ func Start(key string, groupId int) {
 	if err != nil {
 		panic(err)
 	}
+	port := os.Getenv("ADDRESS")
 
 	//Обработка новых сообщений
 	lp.MessageNew(func(ctx context.Context, obj events.MessageNewObject) {
@@ -122,33 +126,43 @@ func Start(key string, groupId int) {
 				createAndSendMessagesAndKeyboard(vk, PeerID, "Твой новый кабинет:"+Message, createGeneralKeyboard(true))
 				user.Cabinet = cab
 			}
+			changeUserFile(nameFile, user)
+			return
 		}
 
 		if user.Cabinet == 0 && user.LastMessages != "Кабинет" {
 			createAndSendMessages(vk, PeerID, "Я тебя не знаю, давай познакомимься поближе\nУкажи номер своего кабинета")
 			user.LastMessages = "Кабинет"
+			changeUserFile(nameFile, user)
+			return
 		}
 		if Message == "Личный кабинет" {
 			user.LastMessages = Message
 			createAndSendMessagesAndKeyboard(vk, PeerID, "Чем я могу тебе помочь?", createPersonalAreaKeyboard())
+			changeUserFile(nameFile, user)
+			return
 		}
 		if Message == "Изменить кабинет" {
 			user.Cabinet = 0
 			user.LastMessages = "Кабинет"
 			createAndSendMessages(vk, PeerID, "Укажи номер своего кабинета")
+			changeUserFile(nameFile, user)
+			return
 		}
 		if Message == "История заказов" {
 			user.LastMessages = Message
 			// отправка истории 5 штук
 			createAndSendMessagesAndKeyboard(vk, PeerID, "ТУТ ИСТОРИЯ", createGeneralKeyboard(false))
-
+			changeUserFile(nameFile, user)
+			return
 		}
 
 		if user.LastMessages == "Отменить заказ" {
 			user.LastMessages = Message
 			// получаем id и отменяем заказ
 			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createGeneralKeyboard(false))
-
+			changeUserFile(nameFile, user)
+			return
 		}
 
 		if Message == "Отменить заказ" {
@@ -156,22 +170,34 @@ func Start(key string, groupId int) {
 			// отправка истории 5 штук
 			/*			createAndSendMessagesAndKeyboard(vk, PeerID, "Выбери заказ", createPersonalAreaKeyboard())
 			 */createAndSendMessages(vk, PeerID, "ТУТ ИСТОРИЯ с inline кнопками")
-
+			changeUserFile(nameFile, user)
+			return
 		}
 
-		if user.LastMessages == "Заказ" {
+		if user.LastMessages == "Заказ" && Message != "Сделать заказ" {
 			user.LastMessages = "Заказ создан"
 			// создать заявку
-			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, createGeneralKeyboard(false))
+			emp := &db.Task{UserID: uint(PeerID), Room: uint(user.Cabinet), Text: Message} // default значения
+			jsonData, _ := json.Marshal(emp)
 
+			_, err := http.Post("http://"+port+"/add_task", "application/json",
+				bytes.NewBuffer(jsonData))
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, createGeneralKeyboard(false))
+			changeUserFile(nameFile, user)
+			return
 		}
 
 		if Message == "Сделать заказ" {
 			user.LastMessages = "Заказ"
 			createAndSendMessages(vk, PeerID, "Напиши что тебе принести")
+			changeUserFile(nameFile, user)
+			return
 		}
-
-		changeUserFile(nameFile, user)
 
 	})
 
