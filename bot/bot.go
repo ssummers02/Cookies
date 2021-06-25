@@ -15,29 +15,48 @@ import (
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
 )
 
+func PostFloor(vk *api.VK, Message string, PeerID int) {
+	floor, err := strconv.Atoi(Message)
+	if err != nil { // если возникла ошибка
+		PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
+	} else {
+		PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
+		db.ChangeFloor(PeerID, Message)
+	}
+}
+func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
+	port := os.Getenv("ADDRESS")
+	userHistory := GetHistory(port, PeerID)
+
+	for _, task := range userHistory.Tasks {
+		if strconv.Itoa(int(task.ID)) == Message {
+			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/"+Message+"/4", nil)
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, err = http.DefaultClient.Do(req)
+			PostMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", GetGeneralKeyboard(false))
+			return Message
+		}
+	}
+	PostMessagesAndKeyboard(vk, PeerID, "Этот заказ не может быть отменен", GetGeneralKeyboard(false))
+
+	return Message
+}
 func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	userStatus, _ := db.GetUsers(PeerID)
-
-	port := os.Getenv("ADDRESS")
 
 	if userStatus.Room == "0" && userStatus.LastMessages == "Кабинет" {
 		db.ChangeRoom(PeerID, Message)
 		PostAndSendMessages(vk, PeerID, "Твой новый кабинет: "+Message+"\n Укажи этаж")
 		return "Этаж"
 	}
-
 	if userStatus.Room == "0" && userStatus.LastMessages != "Кабинет" {
 		PostAndSendMessages(vk, PeerID, "Я тебя не знаю, давай познакомимься поближе\nУкажи номер своего кабинета")
 		return "Кабинет"
 	}
 	if userStatus.LastMessages == "Этаж" {
-		floor, err := strconv.Atoi(Message)
-		if err != nil { // если возникла ошибка
-			PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
-		} else {
-			PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
-			db.ChangeFloor(PeerID, Message)
-		}
+		PostFloor(vk, Message, PeerID)
 		return ""
 	}
 	if Message == "Личный кабинет" {
@@ -48,54 +67,33 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 		db.ChangeRoom(PeerID, "")
 		PostAndSendMessages(vk, PeerID, "Укажи номер своего кабинета")
 		return "Кабинет"
-
 	}
 	if Message == "История заказов" {
-		PostHistoryForUser(vk, port, PeerID)
+		PostHistoryForUser(vk, PeerID)
 		PostMessagesAndKeyboard(vk, PeerID, "Выбери с чем тебе помочь", GetGeneralKeyboard(true))
 		return Message
 	}
-
 	if userStatus.LastMessages == "Отменить заказ" {
-		userHistory := GetHistory(port, PeerID)
-
-		for _, task := range userHistory.Tasks {
-			if strconv.Itoa(int(task.ID)) == Message {
-				req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/"+Message+"/4", nil)
-				if err != nil {
-					fmt.Println(err)
-				}
-				_, err = http.DefaultClient.Do(req)
-				PostMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", GetGeneralKeyboard(false))
-				return Message
-			}
-		}
-		PostMessagesAndKeyboard(vk, PeerID, "Этот заказ не может быть отменен", GetGeneralKeyboard(false))
-
-		return Message
+		return ChangeStatus(vk, Message, PeerID)
 	}
 	if Message == "Вернуться назад" {
 		PostMessagesAndKeyboard(vk, PeerID, "Выбери с чем тебе помочь", GetGeneralKeyboard(true))
 		return Message
 	}
 	if Message == "Отменить заказ" {
-		SelectDeleteHistory(vk, port, PeerID)
+		SelectDeleteHistory(vk, PeerID)
 		return Message
 	}
-
 	if userStatus.LastMessages == "Заказ" && Message != "Сделать заказ" {
 		PostNewTask(vk, Message, PeerID, userStatus.Room, userStatus.Floor)
 		PostMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, GetGeneralKeyboard(false))
 		return "Заказ создан"
-
 	}
-
 	if Message == "Сделать заказ" {
 		PostAndSendMessages(vk, PeerID, "Напиши что тебе принести")
 		return "Заказ"
 	}
 	return ""
-
 }
 
 func Start(key string, groupId int) {

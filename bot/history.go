@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/SevereCloud/vksdk/v2/api"
@@ -33,7 +34,8 @@ func GetHistory(port string, PeerID int) db.ArrayTask {
 	return userHistory
 }
 
-func PostHistoryForUser(vk *api.VK, port string, PeerID int) {
+func PostHistoryForUser(vk *api.VK, PeerID int) {
+	port := os.Getenv("ADDRESS")
 	userHistory := GetHistory(port, PeerID)
 
 	if len(userHistory.Tasks) == 0 {
@@ -45,7 +47,8 @@ func PostHistoryForUser(vk *api.VK, port string, PeerID int) {
 		PostMessagesAndKeyboard(vk, PeerID, createMessage, GetGeneralKeyboard(false))
 	}
 }
-func SelectDeleteHistory(vk *api.VK, port string, PeerID int) {
+func SelectDeleteHistory(vk *api.VK, PeerID int) {
+	port := os.Getenv("ADDRESS")
 	userHistory := GetHistory(port, PeerID)
 
 	if len(userHistory.Tasks) == 0 {
