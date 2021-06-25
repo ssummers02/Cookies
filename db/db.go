@@ -8,6 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var db *gorm.DB
+
+var limit int
+
 func InitDB(dbName string, lim int) {
 	var err error
 	db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})

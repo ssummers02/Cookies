@@ -1,14 +1,6 @@
 package db
 
-import (
-	"time"
-
-	"gorm.io/gorm"
-)
-
-var db *gorm.DB
-
-var limit int
+import "time"
 
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
