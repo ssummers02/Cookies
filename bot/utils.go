@@ -1,37 +1,31 @@
 package bot
 
 import (
+	"bytes"
+	"encoding/json"
 	"log"
+	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/api/params"
-	"github.com/SevereCloud/vksdk/v2/object"
+	"ssummers02/Cookies/db"
 )
 
-func createPersonalAreaKeyboard() *object.MessagesKeyboard {
-	k := object.NewMessagesKeyboardInline()
+func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int) {
+	port := os.Getenv("ADDRESS")
+	emp := &db.Task{UserID: uint(PeerID), Name: GetName(vk, PeerID), Room: room, Text: Message, Floor: floor}
+	jsonData, _ := json.Marshal(emp)
 
-	k.AddRow()
-	k.AddTextButton(`Изменить кабинет`, ``, `primary`)
+	_, err := http.Post("http://"+port+"/api/add_task", "application/json",
+		bytes.NewBuffer(jsonData))
 
-	k.AddRow()
-	k.AddTextButton(`История заказов`, ``, `secondary`)
-
-	k.AddRow()
-	k.AddTextButton(`Отменить заказ`, ``, `negative`)
-
-	return k
+	if err != nil {
+		log.Fatal(err)
+	}
 }
-func createGeneralKeyboard(t bool) *object.MessagesKeyboard {
-	k := object.NewMessagesKeyboard(object.BaseBoolInt(t))
 
-	k.AddRow()
-	k.AddTextButton(`Личный кабинет`, ``, `primary`)
-	k.AddTextButton(`Сделать заказ`, ``, `primary`)
-
-	return k
-}
 func GetName(vk *api.VK, PeerID int) string {
 	b := params.NewUsersGetBuilder()
 	var id = []string{strconv.Itoa(PeerID)}
