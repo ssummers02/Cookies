@@ -15,6 +15,7 @@ var limit int
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
 	UserID    uint   `json:"user"`
+	Name      string `json:"name"`
 	Floor     int    `json:"floor"`
 	Room      string `json:"room"`
 	Text      string `json:"text"`
@@ -58,7 +59,7 @@ func GetUsers(id int) (Users, error) {
 	return user, res.Error
 }
 
-func ChangeFloor(id string, n string) error {
+func ChangeFloor(id int, n string) error {
 	return db.Model(&Users{}).Where("user_id = ?", id).Update("floor", n).Error
 }
 

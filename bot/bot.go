@@ -22,19 +22,6 @@ import (
 	"github.com/SevereCloud/vksdk/v2/object"
 )
 
-func GetName(vk *api.VK, PeerID int) string {
-	b := params.NewUsersGetBuilder()
-	var id = []string{strconv.Itoa(PeerID)}
-	b.UserIDs(id)
-
-	resp, err := vk.UsersGet(b.Params)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	return resp[0].FirstName + " " + resp[0].LastName
-}
-
 // Отправка сообщения пользователю
 func createAndSendMessages(vk *api.VK, PeerID int, text string) {
 	rand.Seed(time.Now().UnixNano())
@@ -62,22 +49,6 @@ func createAndSendMessagesAndKeyboard(vk *api.VK, PeerID int, text string, k *ob
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func findOutTheStatus(n uint) string {
-	switch n {
-	case 0:
-		return "создана"
-	case 1:
-		return "выполнена"
-	case 2:
-		return "требует уточнения"
-	case 3:
-		return "отклонена"
-	case 4:
-		return "отменена пользователем"
-	}
-	return ""
 }
 
 func GetHistory(port string, PeerID int) db.ArrayTask {
@@ -141,27 +112,32 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 
 	port := os.Getenv("ADDRESS")
 
-	if userStatus.Room == 0 && userStatus.LastMessages == "Кабинет" {
-		room, err := strconv.Atoi(Message)
-		if err != nil { // если возникла ошибка
-			createAndSendMessages(vk, PeerID, "Неверный кабинет, попробуй еще раз")
-		} else {
-			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой новый кабинет:"+strconv.Itoa(room), createGeneralKeyboard(true))
-			db.ChangeRoom(PeerID, room)
-		}
-		return ""
+	if userStatus.Room == "0" && userStatus.LastMessages == "Кабинет" {
+		db.ChangeRoom(PeerID, Message)
+		createAndSendMessages(vk, PeerID, "Твой новый кабинет: "+Message+"\n Укажи этаж")
+		return "Этаж"
 	}
 
-	if userStatus.Room == 0 && userStatus.LastMessages != "Кабинет" {
+	if userStatus.Room == "0" && userStatus.LastMessages != "Кабинет" {
 		createAndSendMessages(vk, PeerID, "Я тебя не знаю, давай познакомимься поближе\nУкажи номер своего кабинета")
 		return "Кабинет"
+	}
+	if userStatus.LastMessages == "Этаж" {
+		floor, err := strconv.Atoi(Message)
+		if err != nil { // если возникла ошибка
+			createAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
+		} else {
+			createAndSendMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", createGeneralKeyboard(true))
+			db.ChangeFloor(PeerID, Message)
+		}
+		return ""
 	}
 	if Message == "Личный кабинет" {
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Чем я могу тебе помочь?", createPersonalAreaKeyboard())
 		return Message
 	}
 	if Message == "Изменить кабинет" {
-		db.ChangeRoom(PeerID, 0)
+		db.ChangeRoom(PeerID, "")
 		createAndSendMessages(vk, PeerID, "Укажи номер своего кабинета")
 		return "Кабинет"
 
@@ -200,17 +176,7 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	}
 
 	if userStatus.LastMessages == "Заказ" && Message != "Сделать заказ" {
-		// создать заявку
-		emp := &db.Task{UserID: uint(PeerID), Room: userStatus.Room, Text: Message} // default значения
-		jsonData, _ := json.Marshal(emp)
-
-		_, err := http.Post("http://"+port+"/api/add_task", "application/json",
-			bytes.NewBuffer(jsonData))
-
-		if err != nil {
-			log.Fatal(err)
-		}
-		GetName(vk, PeerID)
+		PostNewTask(vk, Message, PeerID, userStatus.Room, userStatus.Floor)
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, createGeneralKeyboard(false))
 		return "Заказ создан"
 
@@ -222,6 +188,18 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	}
 	return ""
 
+}
+func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int) {
+	port := os.Getenv("ADDRESS")
+	emp := &db.Task{UserID: uint(PeerID), Name: GetName(vk, PeerID), Room: room, Text: Message, Floor: floor}
+	jsonData, _ := json.Marshal(emp)
+
+	_, err := http.Post("http://"+port+"/api/add_task", "application/json",
+		bytes.NewBuffer(jsonData))
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func Start(key string, groupId int) {
@@ -240,7 +218,7 @@ func Start(key string, groupId int) {
 
 		_, err := db.GetUsers(PeerID)
 		if err != nil {
-			db.CreateUsers(db.Users{UserID: PeerID})
+			db.CreateUsers(db.Users{UserID: PeerID, Room: "0"})
 			createAndSendMessages(vk, PeerID, "Привет! Я Печенька")
 		}
 
