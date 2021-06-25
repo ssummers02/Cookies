@@ -22,11 +22,11 @@ and run:
 ```
 ## API
 ### Get tasks (maximum - LIMIT)
-For get all tasks, use GET request to ```ADDRESS/```
+For get all tasks, use GET request to ```ADDRESS/api/```
 
-For get tasks from room, use GET request to ```ADDRESS/room/{room_id}/```
+For get tasks from room, use GET request to ```ADDRESS/api/room/{room_id}/```
 ### Create task
-For create new task use POST request to ```ADDRESS/add_task/```
+For create new task use POST request to ```ADDRESS/api/add_task/```
 
 Request must include:
 
