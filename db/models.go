@@ -13,6 +13,7 @@ var limit int
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
 	UserID    uint   `json:"user"`
+	Name      string `json:"name"`
 	Floor     int    `json:"floor"`
 	Room      string `json:"room"`
 	Text      string `json:"text"`

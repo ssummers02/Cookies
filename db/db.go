@@ -34,11 +34,11 @@ func GetUsers(id int) (Users, error) {
 	return user, res.Error
 }
 
-func ChangeFloor(id string, n string) error {
+func ChangeFloor(id int, n string) error {
 	return db.Model(&Users{}).Where("user_id = ?", id).Update("floor", n).Error
 }
 
-func ChangeRoom(id int, n int) error {
+func ChangeRoom(id int, n string) error {
 	return db.Model(&Users{}).Where("user_id = ?", id).Update("room", n).Error
 }
 
