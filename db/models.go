@@ -62,7 +62,7 @@ func ChangeFloor(id string, n string) error {
 	return db.Model(&Users{}).Where("user_id = ?", id).Update("floor", n).Error
 }
 
-func ChangeRoom(id int, n int) error {
+func ChangeRoom(id int, n string) error {
 	return db.Model(&Users{}).Where("user_id = ?", id).Update("room", n).Error
 }
 
