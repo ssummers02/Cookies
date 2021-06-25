@@ -81,7 +81,7 @@ func OpenUserFile(nameFile string) db.Users {
 func GetHistory(port string, PeerID int) db.ArrayTask {
 	var userHistory db.ArrayTask
 
-	resp, err := http.Get("http://" + port + "/user/" + strconv.Itoa(PeerID) + "/5")
+	resp, err := http.Get("http://" + port + "/api/user/" + strconv.Itoa(PeerID) + "/5")
 
 	if err != nil {
 		log.Fatal(err)
@@ -172,7 +172,7 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 
 	if userStatus.LastMessages == "Отменить заказ" {
 
-		req, err := http.NewRequest(http.MethodDelete, "http://"+port+"/task/"+Message, nil)
+		req, err := http.NewRequest(http.MethodDelete, "http://"+port+"/api/task/"+Message, nil)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -195,7 +195,7 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 		emp := &db.Task{UserID: uint(PeerID), Room: uint(userStatus.Room), Text: Message} // default значения
 		jsonData, _ := json.Marshal(emp)
 
-		_, err := http.Post("http://"+port+"/add_task", "application/json",
+		_, err := http.Post("http://"+port+"/api/add_task", "application/json",
 			bytes.NewBuffer(jsonData))
 
 		if err != nil {

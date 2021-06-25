@@ -35,13 +35,13 @@ func main() {
 	}(vkKey, vkGroupId)
 	db.InitDB(dbName, lim)
 	router := mux.NewRouter()
-	router.HandleFunc("/", api.GetTasksTable).Methods("GET")
-	router.HandleFunc("/add_task", api.NewTask).Methods("POST")
-	router.HandleFunc("/room/{id:[0-9]+}", api.GetTasksInRoom).Methods("GET")
-	router.HandleFunc("/task/{id:[0-9]+}", api.DeleteTask).Methods("DELETE")
-	router.HandleFunc("/task/{id:[0-9]+}", api.PutTask).Methods("PUT")
-	router.HandleFunc("/user/{user_id:[0-9]+}/{count:[0-9]+}", api.GetHistory).Methods("GET")
-	router.HandleFunc("/task/{task_id:[0-9]+}/{status:[0-9]+}", api.ChangeStatus).Methods("PUT")
+	router.HandleFunc("/api/", api.GetTasksTable).Methods("GET")
+	router.HandleFunc("/api/add_task", api.NewTask).Methods("POST")
+	router.HandleFunc("/api/room/{id:[0-9]+}", api.GetTasksInRoom).Methods("GET")
+	router.HandleFunc("/api/task/{id:[0-9]+}", api.DeleteTask).Methods("DELETE")
+	router.HandleFunc("/api/task/{id:[0-9]+}", api.PutTask).Methods("PUT")
+	router.HandleFunc("/api/user/{user_id:[0-9]+}/{count:[0-9]+}", api.GetHistory).Methods("GET")
+	router.HandleFunc("/api/task/{task_id:[0-9]+}/{status:[0-9]+}", api.ChangeStatus).Methods("PUT")
 
 	srv := &http.Server{
 		Handler: router,
