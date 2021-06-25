@@ -1,14 +1,16 @@
 # Cookies
 ## Build and run
-### ENV
+### Environment
 Create .env file with 2 variables: ADDRESS and LIMIT, where ADDRESS - address on which will be hosted, LIMIT - maximum count of tasks in GET requests result
-vk api for bots https://vk.com/dev/bots_docs
+
+[VK API for setup bot](https://vk.com/dev/bots_docs "VK's API page")
+
 Example:
 ```
 ADDRESS=127.0.0.1:8080
 LIMIT=10
 VK_KEY=token
-VK_GROUP_ID=123
+VK_GROUP_ID=group_id
 DATABASE=data.db
 ``` 
 ### Build
@@ -37,4 +39,4 @@ Request must include:
 
 ```Room: int``` (customers room number)
 
-```CreatedAt: string``` (time, in format ```HH:MM```)
+## VK API for bots
