@@ -15,7 +15,8 @@ var limit int
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
 	UserID    uint   `json:"user"`
-	Room      uint   `json:"room"`
+	Floor     int    `json:"floor"`
+	Room      string `json:"room"`
 	Text      string `json:"text"`
 	Status    uint   `json:"status"` // 1: New, 2: Done // Add if we have time for it)
 	CreatedAt time.Time
@@ -23,7 +24,8 @@ type Task struct {
 type Users struct {
 	UserID       int    `json:"user"`
 	LastMessages string `json:"LastMessages"`
-	Room         int    `json:"Room"`
+	Floor        int    `json:"floor"`
+	Room         string `json:"Room"`
 }
 
 type ArrayTask struct {
@@ -38,21 +40,16 @@ func InitDB(dbName string, lim int) {
 		return
 	}
 	limit = lim
-	db.AutoMigrate(&Task{})
-	db.AutoMigrate(&Users{})
-
+	db.AutoMigrate(&Task{}, &Users{})
 }
 
 func CreateTask(task Task) error {
 	task.CreatedAt = time.Now()
 	return db.Create(&task).Error
 }
+
 func CreateUsers(user Users) error {
 	return db.Create(&user).Error
-}
-
-func UpdateTask(task Task) error {
-	return db.Save(&task).Error
 }
 
 func GetUsers(id int) (Users, error) {
@@ -60,6 +57,11 @@ func GetUsers(id int) (Users, error) {
 	res := db.First(&user, id)
 	return user, res.Error
 }
+
+func ChangeFloor(id string, n string) error {
+	return db.Model(&Users{}).Where("user_id = ?", id).Update("floor", n).Error
+}
+
 func ChangeRoom(id int, n int) error {
 	return db.Model(&Users{}).Where("user_id = ?", id).Update("room", n).Error
 }
@@ -97,7 +99,7 @@ func GetTaskInRoom(room string) ([]Task, error) {
 }
 
 func DeleteTask(id uint) error {
-	task, err := GetTask(uint(id))
+	task, err := GetTask(id)
 	if err != nil {
 		return err
 	}

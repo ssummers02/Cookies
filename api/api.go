@@ -76,24 +76,6 @@ func DeleteTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// PutTask : PUT handler for task model.
-func PutTask(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var task db.Task
-	byteVale, err := ioutil.ReadAll(r.Body)
-
-	json.Unmarshal(byteVale, &task)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if err := db.UpdateTask(task); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-}
-
 func GetHistory(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["user_id"]
@@ -120,6 +102,15 @@ func ChangeStatus(w http.ResponseWriter, r *http.Request) {
 	newStatus := vars["status"]
 	taskId := vars["task_id"]
 	if err := db.ChangeStatus(taskId, newStatus); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
+func ChangeFloor(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	newFloor := vars["floor"]
+	taskId := vars["task_id"]
+	if err := db.ChangeFloor(taskId, newFloor); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 }

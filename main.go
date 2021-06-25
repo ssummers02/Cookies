@@ -9,7 +9,6 @@ import (
 	"ssummers02/Cookies/api"
 	"ssummers02/Cookies/bot"
 	"ssummers02/Cookies/db"
-	"ssummers02/Cookies/web"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -40,13 +39,13 @@ func main() {
 	router.HandleFunc("/api/add_task", api.NewTask).Methods("POST")
 	router.HandleFunc("/api/room/{id:[0-9]+}", api.GetTasksInRoom).Methods("GET")
 	router.HandleFunc("/api/task/{id:[0-9]+}", api.DeleteTask).Methods("DELETE")
-	router.HandleFunc("/api/task/{id:[0-9]+}", api.PutTask).Methods("PUT")
 	router.HandleFunc("/api/user/{user_id:[0-9]+}/{count:[0-9]+}", api.GetHistory).Methods("GET")
 	router.HandleFunc("/api/task/{task_id:[0-9]+}/{status:[0-9]+}", api.ChangeStatus).Methods("PUT")
+	router.HandleFunc("/api/task/{task_id:[0-9]+}/{floor:[0-9]+}", api.ChangeStatus).Methods("PUT")
 
-	router.HandleFunc("/", web.ShowActiveTasks).Methods("GET")
-	router.HandleFunc("/all", web.ShowAllTasks).Methods("GET")
-	router.HandleFunc("/settings", web.ShowSettings).Methods("GET")
+	//router.HandleFunc("/", web.ShowActiveTasks).Methods("GET")
+	//router.HandleFunc("/all", web.ShowAllTasks).Methods("GET")
+	//router.HandleFunc("/settings", web.ShowSettings).Methods("GET")
 
 	srv := &http.Server{
 		Handler: router,

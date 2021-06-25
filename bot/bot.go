@@ -201,7 +201,7 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 
 	if userStatus.LastMessages == "Заказ" && Message != "Сделать заказ" {
 		// создать заявку
-		emp := &db.Task{UserID: uint(PeerID), Room: uint(userStatus.Room), Text: Message} // default значения
+		emp := &db.Task{UserID: uint(PeerID), Room: userStatus.Room, Text: Message} // default значения
 		jsonData, _ := json.Marshal(emp)
 
 		_, err := http.Post("http://"+port+"/api/add_task", "application/json",
