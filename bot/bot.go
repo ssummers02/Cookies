@@ -21,7 +21,7 @@ func PostFloor(vk *api.VK, Message string, PeerID int) {
 		PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
 	} else {
 		PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
-		db.ChangeFloor(PeerID, Message)
+		db.ChangeFloor(PeerID, floor)
 	}
 }
 func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
@@ -64,7 +64,8 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 		return Message
 	}
 	if Message == "Изменить кабинет" {
-		db.ChangeRoom(PeerID, "")
+		db.ChangeRoom(PeerID, "0")
+		db.ChangeFloor(PeerID, 0)
 		PostAndSendMessages(vk, PeerID, "Укажи номер своего кабинета")
 		return "Кабинет"
 	}
@@ -112,7 +113,7 @@ func Start(key string, groupId int) {
 
 		_, err := db.GetUsers(PeerID)
 		if err != nil {
-			db.CreateUsers(db.Users{UserID: PeerID, Room: "0"})
+			db.CreateUsers(db.Users{UserID: PeerID, Room: "0", Floor: 0})
 			PostAndSendMessages(vk, PeerID, "Привет! Я Печенька")
 		}
 

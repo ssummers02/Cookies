@@ -38,7 +38,7 @@ func GetUsers(id int) (Users, error) {
 	return user, res.Error
 }
 
-func ChangeFloor(id int, n string) error {
+func ChangeFloor(id int, n int) error {
 	return db.Model(&Users{}).Where("user_id = ?", id).Update("floor", n).Error
 }
 
