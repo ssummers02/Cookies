@@ -12,7 +12,7 @@ VK_GROUP_ID=123
 DATABASE=data.db
 ``` 
 ### Build
-For build use command in progect directory:
+For build use command in project directory:
 ```
 go build .
 ```
