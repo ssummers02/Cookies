@@ -22,6 +22,19 @@ import (
 	"github.com/SevereCloud/vksdk/v2/object"
 )
 
+func GetName(vk *api.VK, PeerID int) string {
+	b := params.NewUsersGetBuilder()
+	var id = []string{strconv.Itoa(PeerID)}
+	b.UserIDs(id)
+
+	resp, err := vk.UsersGet(b.Params)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	return resp[0].FirstName + " " + resp[0].LastName
+}
+
 // Отправка сообщения пользователю
 func createAndSendMessages(vk *api.VK, PeerID int, text string) {
 	rand.Seed(time.Now().UnixNano())
@@ -61,23 +74,12 @@ func findOutTheStatus(n uint) string {
 		return "требует уточнения"
 	case 3:
 		return "отклонена"
+	case 4:
+		return "отменена пользователем"
 	}
 	return ""
 }
 
-func OpenUserFile(nameFile string) db.Users {
-	var user db.Users
-
-	jsonFile, err := os.Open(nameFile) // Открытие jsonFile
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile) // Считывание и раскодирование в json
-	json.Unmarshal(byteValue, &user)
-	return user
-
-}
 func GetHistory(port string, PeerID int) db.ArrayTask {
 	var userHistory db.ArrayTask
 
@@ -171,14 +173,21 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	}
 
 	if userStatus.LastMessages == "Отменить заказ" {
+		userHistory := GetHistory(port, PeerID)
 
-		req, err := http.NewRequest(http.MethodDelete, "http://"+port+"/api/task/"+Message, nil)
-		if err != nil {
-			fmt.Println(err)
+		for _, task := range userHistory.Tasks {
+			if strconv.Itoa(int(task.ID)) == Message {
+				req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/"+Message+"/4", nil)
+				if err != nil {
+					fmt.Println(err)
+				}
+				_, err = http.DefaultClient.Do(req)
+				createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createGeneralKeyboard(false))
+				return Message
+			}
 		}
-		_, err = http.DefaultClient.Do(req)
+		createAndSendMessagesAndKeyboard(vk, PeerID, "Этот заказ не может быть отменен", createGeneralKeyboard(false))
 
-		createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", createGeneralKeyboard(false))
 		return Message
 	}
 	if Message == "Вернуться назад" {
@@ -201,7 +210,7 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 		if err != nil {
 			log.Fatal(err)
 		}
-
+		GetName(vk, PeerID)
 		createAndSendMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, createGeneralKeyboard(false))
 		return "Заказ создан"
 
