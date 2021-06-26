@@ -2,11 +2,7 @@ package bot
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/http"
-	"os"
-	"strconv"
 
 	"ssummers02/Cookies/db"
 
@@ -15,34 +11,6 @@ import (
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
 )
 
-func PostFloor(vk *api.VK, Message string, PeerID int) {
-	floor, err := strconv.Atoi(Message)
-	if err != nil { // если возникла ошибка
-		PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
-	} else {
-		PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
-		db.ChangeFloor(PeerID, Message)
-	}
-}
-func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
-	port := os.Getenv("ADDRESS")
-	userHistory := GetHistory(port, PeerID)
-
-	for _, task := range userHistory.Tasks {
-		if strconv.Itoa(int(task.ID)) == Message {
-			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/"+Message+"/4", nil)
-			if err != nil {
-				fmt.Println(err)
-			}
-			_, err = http.DefaultClient.Do(req)
-			PostMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", GetGeneralKeyboard(false))
-			return Message
-		}
-	}
-	PostMessagesAndKeyboard(vk, PeerID, "Этот заказ не может быть отменен", GetGeneralKeyboard(false))
-
-	return Message
-}
 func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	userStatus, _ := db.GetUsers(PeerID)
 
@@ -86,6 +54,7 @@ func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	}
 	if userStatus.LastMessages == "Заказ" && Message != "Сделать заказ" {
 		PostNewTask(vk, Message, PeerID, userStatus.Room, userStatus.Floor)
+		postMessageAdm(vk, Message, userStatus.Room, userStatus.Floor)
 		PostMessagesAndKeyboard(vk, PeerID, "Твой заказ создан: "+Message, GetGeneralKeyboard(false))
 		return "Заказ создан"
 	}

@@ -3,6 +3,7 @@ package bot
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,21 @@ import (
 	"github.com/SevereCloud/vksdk/v2/api/params"
 	"ssummers02/Cookies/db"
 )
+
+const (
+	created            uint = 0
+	completed          uint = 1
+	needsClarification uint = 2
+	canceled           uint = 3
+	canceledByUser     uint = 4
+)
+
+func PostChangeStatus() {
+	vkKey := os.Getenv("VK_KEY")
+
+	vk := api.NewVK(vkKey)
+	PostAndSendMessages(vk, 143103013, "d") // второй аргумент кому отдать изменение статуса
+}
 
 func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int) {
 	port := os.Getenv("ADDRESS")
@@ -53,4 +69,33 @@ func findOutTheStatus(n uint) string {
 		return "отменена пользователем"
 	}
 	return ""
+}
+
+func PostFloor(vk *api.VK, Message string, PeerID int) {
+	floor, err := strconv.Atoi(Message)
+	if err != nil { // если возникла ошибка
+		PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
+	} else {
+		PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
+		db.ChangeFloor(PeerID, Message)
+	}
+}
+func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
+	port := os.Getenv("ADDRESS")
+	userHistory := GetHistory(port, PeerID)
+
+	for _, task := range userHistory.Tasks {
+		if strconv.Itoa(int(task.ID)) == Message {
+			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/"+Message+"/4", nil)
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, err = http.DefaultClient.Do(req)
+			PostMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", GetGeneralKeyboard(false))
+			return Message
+		}
+	}
+	PostMessagesAndKeyboard(vk, PeerID, "Этот заказ не может быть отменен", GetGeneralKeyboard(false))
+
+	return Message
 }
