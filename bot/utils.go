@@ -22,15 +22,16 @@ const (
 	canceledByUser     uint = 4
 )
 
-func PostChangeStatus() {
+var port = os.Getenv("ADDRESS")
+
+func PostChangeStatus(id int, status string) {
 	vkKey := os.Getenv("VK_KEY")
 
 	vk := api.NewVK(vkKey)
-	PostAndSendMessages(vk, 143103013, "d") // второй аргумент кому отдать изменение статуса
+	PostAndSendMessages(vk, id, status) // второй аргумент кому отдать изменение статуса
 }
 
 func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int) {
-	port := os.Getenv("ADDRESS")
 	emp := &db.Task{UserID: uint(PeerID), Name: GetName(vk, PeerID), Room: room, Text: Message, Floor: floor}
 	jsonData, _ := json.Marshal(emp)
 
@@ -81,8 +82,7 @@ func PostFloor(vk *api.VK, Message string, PeerID int) {
 	}
 }
 func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
-	port := os.Getenv("ADDRESS")
-	userHistory := GetHistory(port, PeerID)
+	userHistory := GetHistory(PeerID)
 
 	for _, task := range userHistory.Tasks {
 		if strconv.Itoa(int(task.ID)) == Message {

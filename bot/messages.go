@@ -30,7 +30,6 @@ func PostAndSendMessages(vk *api.VK, PeerID int, text string) {
 func PostMessagesAndKeyboard(vk *api.VK, PeerID int, text string, k *object.MessagesKeyboard) {
 	rand.Seed(time.Now().UnixNano())
 	b := params.NewMessagesSendBuilder()
-
 	b.Keyboard(k)
 	b.Message(text)
 	b.RandomID(rand.Intn(2147483647))

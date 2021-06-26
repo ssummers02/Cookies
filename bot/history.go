@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/SevereCloud/vksdk/v2/api"
@@ -13,7 +12,7 @@ import (
 	"ssummers02/Cookies/db"
 )
 
-func GetHistory(port string, PeerID int) db.ArrayTask {
+func GetHistory(PeerID int) db.ArrayTask {
 	var userHistory db.ArrayTask
 
 	resp, err := http.Get("http://" + port + "/api/user/" + strconv.Itoa(PeerID) + "/5")
@@ -35,8 +34,7 @@ func GetHistory(port string, PeerID int) db.ArrayTask {
 }
 
 func PostHistoryForUser(vk *api.VK, PeerID int) {
-	port := os.Getenv("ADDRESS")
-	userHistory := GetHistory(port, PeerID)
+	userHistory := GetHistory(PeerID)
 
 	if len(userHistory.Tasks) == 0 {
 		PostMessagesAndKeyboard(vk, PeerID, "Заказов нет", GetGeneralKeyboard(false))
@@ -48,8 +46,7 @@ func PostHistoryForUser(vk *api.VK, PeerID int) {
 	}
 }
 func SelectDeleteHistory(vk *api.VK, PeerID int) {
-	port := os.Getenv("ADDRESS")
-	userHistory := GetHistory(port, PeerID)
+	userHistory := GetHistory(PeerID)
 
 	if len(userHistory.Tasks) == 0 {
 		PostMessagesAndKeyboard(vk, PeerID, "Заказов нет", GetGeneralKeyboard(false))
