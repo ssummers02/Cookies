@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"ssummers02/Cookies/bot"
 	"ssummers02/Cookies/db"
 
 	"github.com/gorilla/mux"
@@ -104,6 +105,9 @@ func ChangeStatus(w http.ResponseWriter, r *http.Request) {
 	if err := db.ChangeStatus(taskId, newStatus); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
+	taskID, _ := strconv.Atoi(taskId)
+	task, _ := db.GetTask(uint(taskID)) // Ошибки не может быть ибо существование task с таким taskID проверенно выше
+	bot.PostChangeStatus(int(task.UserID), newStatus)
 }
 
 func ChangeFloor(w http.ResponseWriter, r *http.Request) {
