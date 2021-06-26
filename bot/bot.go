@@ -3,6 +3,7 @@ package bot
 import (
 	"context"
 	"log"
+	"os"
 
 	"ssummers02/Cookies/db"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/SevereCloud/vksdk/v2/events"
 	"github.com/SevereCloud/vksdk/v2/longpoll-bot"
 )
+
+var port string
 
 func messageHandling(vk *api.VK, Message string, PeerID int) string {
 	userStatus, _ := db.GetUsers(PeerID)
@@ -71,6 +74,7 @@ func Start(key string, groupId int) {
 	if err != nil {
 		panic(err)
 	}
+	port = os.Getenv("ADDRESS")
 
 	// Обработка новых сообщений
 	lp.MessageNew(func(ctx context.Context, obj events.MessageNewObject) {

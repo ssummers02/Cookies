@@ -41,7 +41,7 @@ func PostHistoryForUser(vk *api.VK, PeerID int) {
 		return
 	}
 	for i := 0; i < len(userHistory.Tasks); i++ {
-		createMessage := "№" + strconv.Itoa(int(userHistory.Tasks[i].ID)) + ": " + userHistory.Tasks[i].Text + " - " + findOutTheStatus(userHistory.Tasks[i].Status) + "\n"
+		createMessage := "№" + strconv.Itoa(int(userHistory.Tasks[i].ID)) + ": " + userHistory.Tasks[i].Text + " - " + FindOutTheStatus(userHistory.Tasks[i].Status) + "\n"
 		PostMessagesAndKeyboard(vk, PeerID, createMessage, GetGeneralKeyboard(false))
 	}
 }
@@ -58,7 +58,7 @@ func SelectDeleteHistory(vk *api.VK, PeerID int) {
 	for i := 0; i < len(userHistory.Tasks); i++ {
 		id := strconv.Itoa(int(userHistory.Tasks[i].ID))
 		k.AddTextButton(id, ``, `primary`)
-		createMessage := "№" + id + ": " + userHistory.Tasks[i].Text + " - " + findOutTheStatus(userHistory.Tasks[i].Status) + "\n"
+		createMessage := "№" + id + ": " + userHistory.Tasks[i].Text + " - " + FindOutTheStatus(userHistory.Tasks[i].Status) + "\n"
 		PostAndSendMessages(vk, PeerID, createMessage)
 	}
 	k.AddRow()
