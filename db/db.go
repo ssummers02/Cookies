@@ -60,10 +60,28 @@ func GetTask(id uint) (Task, error) {
 	return task, res.Error
 }
 
+func GetActiveTasks() ([]Task, error) {
+	var tasks []Task
+	res := db.Limit(limit).Where("status = ?", 0).Or("status = ?", 2).Order("created_at desc").Find(&tasks)
+	return tasks, res.Error
+}
+
 func GetAllTasks() ([]Task, error) {
 	var tasks []Task
 	res := db.Limit(limit).Order("created_at, room").Find(&tasks)
 	return tasks, res.Error
+}
+
+func GetNumberOfOpenTasks() (int64, error) {
+	var numberOfOpenTasks int64
+	res := db.Model(&Users{}).Where("status = ?", 0).Count(&numberOfOpenTasks)
+	return numberOfOpenTasks, res.Error
+}
+
+func GetNumberOfHoldTasks() (int64, error) {
+	var numberOfHoldTasks int64
+	res := db.Model(&Users{}).Where("status = ?", 2).Count(&numberOfHoldTasks)
+	return numberOfHoldTasks, res.Error
 }
 
 func GetUserHistory(userId uint, countTasks int) ([]Task, error) {
