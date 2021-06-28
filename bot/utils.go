@@ -3,11 +3,11 @@ package bot
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/api/params"
@@ -37,7 +37,11 @@ func postNewTask(vk *api.VK, message string, peerId int, room string, floor int)
 		bytes.NewBuffer(jsonData))
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "utils",
+			"func":    "postNewTask",
+			"error":   err,
+		}).Warning("error post new task")
 	}
 }
 
@@ -49,7 +53,11 @@ func getName(vk *api.VK, peerId int) string {
 	resp, err := vk.UsersGet(b.Params)
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "utils",
+			"func":    "getName",
+			"error":   err,
+		}).Warning("get name")
 	}
 	return resp[0].FirstName + " " + resp[0].LastName
 }
@@ -86,7 +94,11 @@ func changeStatus(vk *api.VK, message string, peerId int) string {
 		if strconv.Itoa(int(task.ID)) == message {
 			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/status/"+message+"/4", nil)
 			if err != nil {
-				fmt.Println(err)
+				log.WithFields(log.Fields{
+					"package": "utils",
+					"func":    "changeStatus",
+					"error":   err,
+				}).Warning("change Status")
 			}
 			_, err = http.DefaultClient.Do(req)
 			postMessagesAndKeyboard(vk, peerId, "Твой заказ отменен", getGeneralKeyboard(false))

@@ -1,11 +1,12 @@
 package bot
 
 import (
-	"log"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/api/params"
@@ -22,7 +23,11 @@ func postAndSendMessages(vk *api.VK, peerId int, text string) {
 	b.PeerID(peerId)
 	_, err := vk.MessagesSend(b.Params)
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "messages",
+			"func":    "postAndSendMessages",
+			"error":   err,
+		}).Warning("error send messages")
 	}
 }
 
@@ -36,7 +41,11 @@ func postMessagesAndKeyboard(vk *api.VK, peerId int, text string, k *object.Mess
 	b.PeerID(peerId)
 	_, err := vk.MessagesSend(b.Params)
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "messages",
+			"func":    "postMessagesAndKeyboard",
+			"error":   err,
+		}).Warning("error send messages")
 	}
 }
 func postMessageAdm(vk *api.VK, message string, room string, floor int) {

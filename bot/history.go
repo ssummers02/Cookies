@@ -3,9 +3,10 @@ package bot
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/object"
@@ -18,7 +19,11 @@ func getHistory(peerId int) db.ArrayTask {
 	resp, err := http.Get("http://" + port + "/api/user/" + strconv.Itoa(peerId) + "/5")
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "history",
+			"func":    "getHistory",
+			"error":   err,
+		}).Warning("error get history")
 	}
 
 	defer resp.Body.Close()
@@ -26,7 +31,11 @@ func getHistory(peerId int) db.ArrayTask {
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "history",
+			"func":    "getHistory",
+			"error":   err,
+		}).Warning("error get history")
 	}
 	json.Unmarshal(body, &userHistory)
 

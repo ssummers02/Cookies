@@ -2,8 +2,9 @@ package bot
 
 import (
 	"context"
-	"log"
 	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	"ssummers02/Cookies/db"
 
