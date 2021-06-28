@@ -1,7 +1,7 @@
 package web
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"text/template"
 )
@@ -22,20 +22,20 @@ func AllTasksPage(w http.ResponseWriter, r *http.Request) {
 	page.HighlightAllMenu = true
 	page.Content, err = buildTasksTable("all")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Print(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	t := template.New("main.html")
 	t, err = t.ParseFiles("./web/assets/templates/main.html")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Print(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	err = t.Execute(w, page)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Print(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -48,20 +48,20 @@ func ActiveTasksPage(w http.ResponseWriter, r *http.Request) {
 	page.HighlightActiveMenu = true
 	page.Content, err = buildTasksTable("active")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Print(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	t := template.New("main.html")
 	t, err = t.ParseFiles("./web/assets/templates/main.html")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Print(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 	err = t.Execute(w, page)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Print(err)
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}

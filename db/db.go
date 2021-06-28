@@ -68,7 +68,7 @@ func GetActiveTasks() ([]Task, error) {
 
 func GetAllTasks() ([]Task, error) {
 	var tasks []Task
-	res := db.Limit(limit).Order("created_at, room").Find(&tasks)
+	res := db.Limit(limit).Order("created_at desc, room").Find(&tasks)
 	return tasks, res.Error
 }
 
@@ -92,7 +92,7 @@ func GetUserHistory(userId uint, countTasks int) ([]Task, error) {
 
 func GetTaskInRoom(room string) ([]Task, error) {
 	var tasks []Task
-	res := db.Limit(limit).Where("room = ?", room).Order("created_at, room").Find(&tasks)
+	res := db.Limit(limit).Where("room = ?", room).Order("created_at desc").Find(&tasks)
 	return tasks, res.Error
 }
 

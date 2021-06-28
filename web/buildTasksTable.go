@@ -17,30 +17,31 @@ func buildTasksTable(room string) (string, error) {
 	case "active":
 		tasks, err = db.GetActiveTasks()
 		if err != nil {
-			log.Printf("%s:%s", "buildTasksTable.go - db.GetActiveTasks", err.Error())
+			log.Print(err)
 			return "", err
 		}
 	case "all":
 		tasks, err = db.GetAllTasks()
 		if err != nil {
-			log.Printf("%s:%s", "buildTasksTable - db.GetAllTasks", err.Error())
+			log.Print(err)
 			return "", err
 		}
 	default:
 		tasks, err = db.GetTaskInRoom(room)
 		if err != nil {
+			log.Print(err)
 			return "", err
 		}
 	}
 	t := template.New("tasksTable.html").Funcs(template.FuncMap{"escape": escapingInTemplate})
 	t, err = t.ParseFiles("./web/assets/templates/tasksTable.html")
 	if err != nil {
-		log.Printf("%s:%s", "buildTasksTable t.ParseFiles", err.Error())
+		log.Print(err)
 		return "", err
 	}
 	err = t.Execute(&renderedTemplate, tasks)
 	if err != nil {
-		log.Printf("%s:%s", "buildTasksTable t.Execute", err.Error())
+		log.Print(err)
 		return "", err
 	}
 	return renderedTemplate.String(), err
