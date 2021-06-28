@@ -44,9 +44,9 @@ func main() {
 	router.HandleFunc("/api/task/status/{task_id:[0-9]+}/{status:[0-9]+}", api.ChangeStatus).Methods("PUT")
 	router.HandleFunc("/api/task/floor/{user_id:[0-9]+}/{floor:[0-9]+}", api.ChangeFloor).Methods("PUT")
 
-	//router.HandleFunc("/", web.ShowActiveTasks).Methods("GET")
-	//router.HandleFunc("/all", web.ShowAllTasks).Methods("GET")
-	//router.HandleFunc("/settings", web.ShowSettings).Methods("GET")
+	// router.HandleFunc("/", web.ShowActiveTasks).Methods("GET")
+	// router.HandleFunc("/all", web.ShowAllTasks).Methods("GET")
+	// router.HandleFunc("/settings", web.ShowSettings).Methods("GET")
 
 	router.HandleFunc("/", web.ActiveTasksPage).Methods("GET")
 	router.HandleFunc("/alltasks", web.AllTasksPage).Methods("GET")
