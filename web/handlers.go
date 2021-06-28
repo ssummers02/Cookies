@@ -7,9 +7,9 @@ import (
 )
 
 type Page struct {
-	HighlightActiveMenu   string
-	HighlightAllMenu      string
-	HighlightSettingsMenu string
+	HighlightActiveMenu   bool
+	HighlightAllMenu      bool
+	HighlightSettingsMenu bool
 	OpenTasksAmount       int64
 	HoldTasksAmount       int64
 	Content               string
@@ -19,15 +19,15 @@ func AllTasksPage(w http.ResponseWriter, r *http.Request) {
 	var page Page
 	var err error
 	fillTasksAmounts(&page)
-	page.HighlightAllMenu = "active"
+	page.HighlightAllMenu = true
 	page.Content, err = buildTasksTable("all")
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	t := template.New("tasks.html")
-	t, err = t.ParseFiles("./web/assets/tasks.html")
+	t := template.New("main.html")
+	t, err = t.ParseFiles("./web/assets/templates/main.html")
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -45,15 +45,15 @@ func ActiveTasksPage(w http.ResponseWriter, r *http.Request) {
 	var page Page
 	var err error
 	fillTasksAmounts(&page)
-	page.HighlightActiveMenu = "active"
+	page.HighlightActiveMenu = true
 	page.Content, err = buildTasksTable("active")
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	t := template.New("tasks.html")
-	t, err = t.ParseFiles("./web/assets/tasks.html")
+	t := template.New("main.html")
+	t, err = t.ParseFiles("./web/assets/templates/main.html")
 	if err != nil {
 		fmt.Println(err.Error())
 		http.Error(w, err.Error(), http.StatusNotFound)
