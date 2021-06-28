@@ -31,10 +31,10 @@
                                 <td><a href="https://vk.com/id{{.UserID}}" target="_blank" rel="noopener noreferrer">{{.Name | escape}}</a></td>
                                 <td>
                                     <div class="sparkbar" data-color="#00a65a" data-height="20">
-                                        <a class="btn btn-{{ if or (eq .Status 0) (eq .Status 4)}}outline-{{ end }}info btn-sm" href="#"><i class="fas fa-clipboard-list"></i>Открыть</a>
-                                        <a class="btn btn-{{ if or (eq .Status 1) (eq .Status 4)}}outline-{{ end }}success btn-sm" href="#"><i class="fas fa-check"></i>Завершить</a>
-                                        <a class="btn btn-{{ if or (eq .Status 2) (eq .Status 4)}}outline-{{ end }}warning btn-sm" href="#"><i class="fas fa-question"></i>Уточнить</a>
-                                        <a class="btn btn-{{ if or (eq .Status 3) (eq .Status 4)}}outline-{{ end }}danger btn-sm" href="#"><i class="fas fa-ban"></i>Отклонить</a>
+                                        <a class="btn btn-{{ if or (eq .Status 0) (eq .Status 4)}}outline-{{ end }}info btn-sm{{ if or (eq .Status 0) (eq .Status 4)}} disabled{{ end }}" href="#"><i class="fas fa-clipboard-list"></i>Открыть</a>
+                                        <a class="btn btn-{{ if or (eq .Status 1) (eq .Status 4)}}outline-{{ end }}success btn-sm{{ if or (eq .Status 1) (eq .Status 4)}} disabled{{ end }}" href="#"><i class="fas fa-check"></i>Завершить</a>
+                                        <a class="btn btn-{{ if or (eq .Status 2) (eq .Status 4)}}outline-{{ end }}warning btn-sm{{ if or (eq .Status 2) (eq .Status 4)}} disabled{{ end }}" href="#"><i class="fas fa-question"></i>Уточнить</a>
+                                        <a class="btn btn-{{ if or (eq .Status 3) (eq .Status 4)}}outline-{{ end }}danger btn-sm{{ if or (eq .Status 3) (eq .Status 4)}} disabled{{ end }}" href="#"><i class="fas fa-ban"></i>Отклонить</a>
                                     </div>
                                 </td>
                             </tr>
