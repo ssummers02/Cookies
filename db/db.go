@@ -74,13 +74,13 @@ func GetAllTasks() ([]Task, error) {
 
 func GetNumberOfOpenTasks() (int64, error) {
 	var numberOfOpenTasks int64
-	res := db.Model(&Users{}).Where("status = ?", 0).Count(&numberOfOpenTasks)
+	res := db.Model(&Task{}).Where("status = ?", 0).Count(&numberOfOpenTasks)
 	return numberOfOpenTasks, res.Error
 }
 
 func GetNumberOfHoldTasks() (int64, error) {
 	var numberOfHoldTasks int64
-	res := db.Model(&Users{}).Where("status = ?", 2).Count(&numberOfHoldTasks)
+	res := db.Model(&Task{}).Where("status = ?", 2).Count(&numberOfHoldTasks)
 	return numberOfHoldTasks, res.Error
 }
 
