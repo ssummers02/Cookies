@@ -84,7 +84,7 @@ func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
 
 	for _, task := range userHistory.Tasks {
 		if strconv.Itoa(int(task.ID)) == Message {
-			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/"+Message+"/4", nil)
+			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/status/"+Message+"/4", nil)
 			if err != nil {
 				fmt.Println(err)
 			}
