@@ -107,7 +107,8 @@ func ChangeStatus(w http.ResponseWriter, r *http.Request) {
 	}
 	taskID, _ := strconv.Atoi(taskId)
 	task, _ := db.GetTask(uint(taskID)) // Ошибки не может быть ибо существование task с таким taskID проверенно выше
-	bot.PostChangeStatus(int(task.UserID), newStatus)
+	st, _ := strconv.Atoi(newStatus)
+	bot.PostChangeStatus(int(task.UserID), taskId, bot.FindOutTheStatus(uint(st)))
 }
 
 func ChangeFloor(w http.ResponseWriter, r *http.Request) {

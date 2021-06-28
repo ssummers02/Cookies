@@ -22,13 +22,11 @@ const (
 	canceledByUser     uint = 4
 )
 
-var port = os.Getenv("ADDRESS")
-
-func PostChangeStatus(id int, status string) {
+func PostChangeStatus(userid int, taskid string, status string) {
 	vkKey := os.Getenv("VK_KEY")
 
 	vk := api.NewVK(vkKey)
-	PostAndSendMessages(vk, id, status) // второй аргумент кому отдать изменение статуса
+	PostAndSendMessages(vk, userid, "Заказ: "+taskid+"-"+status) // второй аргумент кому отдать изменение статуса
 }
 
 func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int) {
@@ -56,7 +54,7 @@ func GetName(vk *api.VK, PeerID int) string {
 	return resp[0].FirstName + " " + resp[0].LastName
 }
 
-func findOutTheStatus(n uint) string {
+func FindOutTheStatus(n uint) string {
 	switch n {
 	case 0:
 		return "создана"
