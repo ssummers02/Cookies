@@ -2,7 +2,6 @@ package web
 
 import (
 	"fmt"
-
 	"ssummers02/Cookies/db"
 )
 
