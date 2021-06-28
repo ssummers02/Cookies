@@ -2,7 +2,7 @@ package bot
 
 import "github.com/SevereCloud/vksdk/v2/object"
 
-func GetPersonalAreaKeyboard() *object.MessagesKeyboard {
+func getPersonalAreaKeyboard() *object.MessagesKeyboard {
 	k := object.NewMessagesKeyboardInline()
 
 	k.AddRow()
@@ -16,7 +16,7 @@ func GetPersonalAreaKeyboard() *object.MessagesKeyboard {
 
 	return k
 }
-func GetGeneralKeyboard(t bool) *object.MessagesKeyboard {
+func getGeneralKeyboard(t bool) *object.MessagesKeyboard {
 	k := object.NewMessagesKeyboard(object.BaseBoolInt(t))
 
 	k.AddRow()

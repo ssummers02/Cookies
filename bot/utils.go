@@ -26,11 +26,11 @@ func PostChangeStatus(userid int, taskid string, status string) {
 	vkKey := os.Getenv("VK_KEY")
 
 	vk := api.NewVK(vkKey)
-	PostAndSendMessages(vk, userid, "Заказ: "+taskid+"-"+status) // второй аргумент кому отдать изменение статуса
+	postAndSendMessages(vk, userid, "Заказ: "+taskid+"-"+status) // второй аргумент кому отдать изменение статуса
 }
 
-func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int) {
-	emp := &db.Task{UserID: uint(PeerID), Name: GetName(vk, PeerID), Room: room, Text: Message, Floor: floor}
+func postNewTask(vk *api.VK, message string, peerId int, room string, floor int) {
+	emp := &db.Task{UserID: uint(peerId), Name: getName(vk, peerId), Room: room, Text: message, Floor: floor}
 	jsonData, _ := json.Marshal(emp)
 
 	_, err := http.Post("http://"+port+"/api/add_task", "application/json",
@@ -41,9 +41,9 @@ func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int)
 	}
 }
 
-func GetName(vk *api.VK, PeerID int) string {
+func getName(vk *api.VK, peerId int) string {
 	b := params.NewUsersGetBuilder()
-	var id = []string{strconv.Itoa(PeerID)}
+	var id = []string{strconv.Itoa(peerId)}
 	b.UserIDs(id)
 
 	resp, err := vk.UsersGet(b.Params)
@@ -70,30 +70,30 @@ func FindOutTheStatus(n uint) string {
 	return ""
 }
 
-func PostFloor(vk *api.VK, Message string, PeerID int) {
-	floor, err := strconv.Atoi(Message)
+func postFloor(vk *api.VK, message string, peerId int) {
+	floor, err := strconv.Atoi(message)
 	if err != nil { // если возникла ошибка
-		PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
+		postAndSendMessages(vk, peerId, "Неверный этаж, попробуй еще раз")
 	} else {
-		PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
-		db.ChangeFloor(PeerID, floor)
+		postMessagesAndKeyboard(vk, peerId, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", getGeneralKeyboard(true))
+		db.ChangeFloor(peerId, floor)
 	}
 }
-func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
-	userHistory := GetHistory(PeerID)
+func changeStatus(vk *api.VK, message string, peerId int) string {
+	userHistory := getHistory(peerId)
 
 	for _, task := range userHistory.Tasks {
-		if strconv.Itoa(int(task.ID)) == Message {
-			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/status/"+Message+"/4", nil)
+		if strconv.Itoa(int(task.ID)) == message {
+			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/status/"+message+"/4", nil)
 			if err != nil {
 				fmt.Println(err)
 			}
 			_, err = http.DefaultClient.Do(req)
-			PostMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", GetGeneralKeyboard(false))
-			return Message
+			postMessagesAndKeyboard(vk, peerId, "Твой заказ отменен", getGeneralKeyboard(false))
+			return message
 		}
 	}
-	PostMessagesAndKeyboard(vk, PeerID, "Этот заказ не может быть отменен", GetGeneralKeyboard(false))
+	postMessagesAndKeyboard(vk, peerId, "Этот заказ не может быть отменен", getGeneralKeyboard(false))
 
-	return Message
+	return message
 }
