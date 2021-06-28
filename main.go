@@ -9,6 +9,7 @@ import (
 	"ssummers02/Cookies/api"
 	"ssummers02/Cookies/bot"
 	"ssummers02/Cookies/db"
+	"ssummers02/Cookies/web"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -46,6 +47,11 @@ func main() {
 	//router.HandleFunc("/", web.ShowActiveTasks).Methods("GET")
 	//router.HandleFunc("/all", web.ShowAllTasks).Methods("GET")
 	//router.HandleFunc("/settings", web.ShowSettings).Methods("GET")
+
+	router.HandleFunc("/", web.ActiveTasksPage).Methods("GET")
+	router.HandleFunc("/alltasks", web.AllTasksPage).Methods("GET")
+	router.PathPrefix("/plugins/").Handler(http.StripPrefix("/plugins/", http.FileServer(http.Dir("./web/assets/plugins"))))
+	router.PathPrefix("/dist/").Handler(http.StripPrefix("/dist/", http.FileServer(http.Dir("./web/assets/dist"))))
 
 	srv := &http.Server{
 		Handler: router,

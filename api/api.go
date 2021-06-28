@@ -113,7 +113,7 @@ func ChangeStatus(w http.ResponseWriter, r *http.Request) {
 
 func ChangeFloor(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	newFloor := vars["floor"]
+	newFloor, _ := strconv.Atoi(vars["floor"])
 	userId, _ := strconv.Atoi(vars["user_id"])
 	if err := db.ChangeFloor(userId, newFloor); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

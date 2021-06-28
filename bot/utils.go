@@ -76,7 +76,7 @@ func PostFloor(vk *api.VK, Message string, PeerID int) {
 		PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
 	} else {
 		PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
-		db.ChangeFloor(PeerID, Message)
+		db.ChangeFloor(PeerID, floor)
 	}
 }
 func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
