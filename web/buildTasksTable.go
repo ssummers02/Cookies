@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"html"
 	"log"
-	"ssummers02/Cookies/db"
 	"text/template"
+
+	"ssummers02/Cookies/db"
 )
 
 func buildTasksTable(room string) (string, error) {
