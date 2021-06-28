@@ -52,7 +52,7 @@ func postMessageAdm(vk *api.VK, message string, room string, floor int) {
 	adm, _ := strconv.Atoi(os.Getenv("ADM"))
 	res := "Новый заказ\n" +
 		"Этаж: " + strconv.Itoa(floor) +
-		"\nКабинет" + room +
+		"\nКабинет: " + room +
 		"\n" + message
 	postAndSendMessages(vk, adm, res)
 }
