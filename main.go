@@ -26,9 +26,9 @@ func main() {
 	limit := os.Getenv("LIMIT")
 	vkKey := os.Getenv("VK_KEY")
 	vkGroup := os.Getenv("VK_GROUP_ID")
-	if _, err := os.Stat("temp"); os.IsNotExist(err) {
+	/*	if _, err := os.Stat("temp"); os.IsNotExist(err) {
 		os.Mkdir("temp", 0777)
-	}
+	}*/
 	lim, _ := strconv.Atoi(limit)
 	vkGroupId, _ := strconv.Atoi(vkGroup)
 	go func(vkKey string, vkGroupId int) {

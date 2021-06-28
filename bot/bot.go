@@ -20,7 +20,7 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 
 	if userStatus.Room == "0" && userStatus.LastMessages == "Кабинет" {
 		db.ChangeRoom(peerId, message)
-		postAndSendMessages(vk, peerId, "Твой новый кабинет: "+message+"\n Укажи этаж")
+		postAndSendMessages(vk, peerId, "Твой новый кабинет: "+message+"\nУкажи этаж")
 		return "Этаж"
 	}
 	if userStatus.Room == "0" && userStatus.LastMessages != "Кабинет" {
@@ -28,15 +28,15 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 		return "Кабинет"
 	}
 	if userStatus.LastMessages == "Этаж" {
-		postFloor(vk, message, peerId)
-		return ""
+		return postFloor(vk, message, peerId)
 	}
 	if message == "Личный кабинет" {
 		postMessagesAndKeyboard(vk, peerId, "Чем я могу тебе помочь?", getPersonalAreaKeyboard())
 		return message
 	}
 	if message == "Изменить кабинет" {
-		db.ChangeRoom(peerId, "")
+		db.ChangeRoom(peerId, "0")
+		db.ChangeFloor(peerId, 0)
 		postAndSendMessages(vk, peerId, "Укажи номер своего кабинета")
 		return "Кабинет"
 	}
@@ -45,12 +45,12 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 		postMessagesAndKeyboard(vk, peerId, "Выбери с чем тебе помочь", getGeneralKeyboard(true))
 		return message
 	}
-	if userStatus.LastMessages == "Отменить заказ" {
-		return changeStatus(vk, message, peerId)
-	}
 	if message == "Вернуться назад" {
 		postMessagesAndKeyboard(vk, peerId, "Выбери с чем тебе помочь", getGeneralKeyboard(true))
 		return message
+	}
+	if userStatus.LastMessages == "Отменить заказ" {
+		return changeStatus(vk, message, peerId)
 	}
 	if message == "Отменить заказ" {
 		selectDeleteHistory(vk, peerId)
@@ -66,6 +66,8 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 		postAndSendMessages(vk, peerId, "Напиши что тебе принести")
 		return "Заказ"
 	}
+	postMessagesAndKeyboard(vk, peerId, "Я всего лишь печенька и не знаю такого, попробуй еще раз", getGeneralKeyboard(false))
+
 	return ""
 }
 

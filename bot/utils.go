@@ -26,7 +26,7 @@ func PostChangeStatus(userid int, taskid string, status string) {
 	vkKey := os.Getenv("VK_KEY")
 
 	vk := api.NewVK(vkKey)
-	postAndSendMessages(vk, userid, "Заказ: "+taskid+"-"+status) // второй аргумент кому отдать изменение статуса
+	postAndSendMessages(vk, userid, "Заказ: '"+taskid+"' - "+status) // второй аргумент кому отдать изменение статуса
 }
 
 func postNewTask(vk *api.VK, message string, peerId int, room string, floor int) {
@@ -65,27 +65,29 @@ func getName(vk *api.VK, peerId int) string {
 func FindOutTheStatus(n uint) string {
 	switch n {
 	case 0:
-		return "создана"
+		return "создан"
 	case 1:
-		return "выполнена"
+		return "выполнен"
 	case 2:
 		return "требует уточнения"
 	case 3:
-		return "отклонена"
+		return "отклонён"
 	case 4:
-		return "отменена пользователем"
+		return "отменён пользователем"
 	}
 	return ""
 }
 
-func postFloor(vk *api.VK, message string, peerId int) {
+func postFloor(vk *api.VK, message string, peerId int) string {
 	floor, err := strconv.Atoi(message)
 	if err != nil { // если возникла ошибка
 		postAndSendMessages(vk, peerId, "Неверный этаж, попробуй еще раз")
+		return "Этаж"
 	} else {
-		postMessagesAndKeyboard(vk, peerId, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", getGeneralKeyboard(true))
+		postMessagesAndKeyboard(vk, peerId, "Твой этаж: "+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", getGeneralKeyboard(true))
 		db.ChangeFloor(peerId, floor)
 	}
+	return ""
 }
 func changeStatus(vk *api.VK, message string, peerId int) string {
 	userHistory := getHistory(peerId)
