@@ -63,8 +63,6 @@ func GetActiveHistory(PeerID int) db.ArrayTask {
 	return userHistory
 }
 
-func PostHistoryForUser(vk *api.VK, PeerID int) {
-	userHistory := GetHistory(PeerID)
 func postHistoryForUser(vk *api.VK, peerId int) {
 	userHistory := getHistory(peerId)
 
@@ -78,10 +76,7 @@ func postHistoryForUser(vk *api.VK, peerId int) {
 	}
 }
 func selectDeleteHistory(vk *api.VK, peerId int) {
-	userHistory := getHistory(peerId)
-
-func SelectDeleteHistory(vk *api.VK, PeerID int) {
-	userHistory := GetActiveHistory(PeerID)
+	userHistory := GetActiveHistory(peerId)
 
 	if len(userHistory.Tasks) == 0 {
 		postMessagesAndKeyboard(vk, peerId, "Заказов нет", getGeneralKeyboard(false))

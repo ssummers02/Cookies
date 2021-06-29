@@ -14,14 +14,6 @@ import (
 	"ssummers02/Cookies/db"
 )
 
-const (
-	Created            uint = 0
-	completed          uint = 1
-	NeedsClarification uint = 2
-	canceled           uint = 3
-	canceledByUser     uint = 4
-)
-
 func PostChangeStatus(userid int, taskid string, status string) {
 	vkKey := os.Getenv("VK_KEY")
 
@@ -90,10 +82,7 @@ func postFloor(vk *api.VK, message string, peerId int) string {
 	return ""
 }
 func changeStatus(vk *api.VK, message string, peerId int) string {
-	userHistory := getHistory(peerId)
-func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
-	userHistory := GetActiveHistory(PeerID)
-
+	userHistory := GetActiveHistory(peerId)
 	for _, task := range userHistory.Tasks {
 		if strconv.Itoa(int(task.ID)) == message {
 			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/status/"+message+"/4", nil)
