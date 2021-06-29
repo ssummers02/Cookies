@@ -90,6 +90,12 @@ func GetUserHistory(userId uint, countTasks int) ([]Task, error) {
 	return tasks, res.Error
 }
 
+func GetUserActiveHistory(userId uint, countTasks int) ([]Task, error) {
+	var tasks []Task
+	res := db.Limit(countTasks).Where("user_id = ? AND status = ?", userId, 0).Or("user_id = ? AND status = ?", userId, 2).Order("created_at desc, room").Find(&tasks)
+	return tasks, res.Error
+}
+
 func GetTaskInRoom(room string) ([]Task, error) {
 	var tasks []Task
 	res := db.Where("room = ?", room).Order("created_at desc").Find(&tasks)

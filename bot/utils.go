@@ -80,7 +80,7 @@ func PostFloor(vk *api.VK, Message string, PeerID int) {
 	}
 }
 func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
-	userHistory := GetHistory(PeerID)
+	userHistory := GetActiveHistory(PeerID)
 
 	for _, task := range userHistory.Tasks {
 		if strconv.Itoa(int(task.ID)) == Message {

@@ -98,6 +98,27 @@ func GetHistory(w http.ResponseWriter, r *http.Request) {
 	w.Write(js)
 }
 
+func GetActiveHistory(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID := vars["user_id"]
+	countVar := vars["count"]
+	userId, _ := strconv.Atoi(userID)
+	count, _ := strconv.Atoi(countVar)
+	tasks, err := db.GetUserActiveHistory(uint(userId), count)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	resp := Response{Tasks: tasks}
+	js, err := json.Marshal(resp)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
+}
+
 func ChangeStatus(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	newStatus := vars["status"]

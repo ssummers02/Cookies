@@ -33,6 +33,27 @@ func GetHistory(PeerID int) db.ArrayTask {
 	return userHistory
 }
 
+func GetActiveHistory(PeerID int) db.ArrayTask {
+	var userHistory db.ArrayTask
+
+	resp, err := http.Get("http://" + port + "/api/useractive/" + strconv.Itoa(PeerID) + "/5")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	json.Unmarshal(body, &userHistory)
+
+	return userHistory
+}
+
 func PostHistoryForUser(vk *api.VK, PeerID int) {
 	userHistory := GetHistory(PeerID)
 
@@ -45,8 +66,9 @@ func PostHistoryForUser(vk *api.VK, PeerID int) {
 		PostMessagesAndKeyboard(vk, PeerID, createMessage, GetGeneralKeyboard(false))
 	}
 }
+
 func SelectDeleteHistory(vk *api.VK, PeerID int) {
-	userHistory := GetHistory(PeerID)
+	userHistory := GetActiveHistory(PeerID)
 
 	if len(userHistory.Tasks) == 0 {
 		PostMessagesAndKeyboard(vk, PeerID, "Заказов нет", GetGeneralKeyboard(false))
