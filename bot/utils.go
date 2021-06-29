@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	created            uint = 0
+	Created            uint = 0
 	completed          uint = 1
-	needsClarification uint = 2
+	NeedsClarification uint = 2
 	canceled           uint = 3
 	canceledByUser     uint = 4
 )

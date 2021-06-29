@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"ssummers02/Cookies/bot"
 )
 
 var db *gorm.DB
@@ -62,7 +63,7 @@ func GetTask(id uint) (Task, error) {
 
 func GetActiveTasks() ([]Task, error) {
 	var tasks []Task
-	res := db.Where("status = ?", 0).Or("status = ?", 2).Order("created_at desc").Find(&tasks)
+	res := db.Where("status = ?", bot.Created).Or("status = ?", bot.NeedsClarification).Order("created_at desc").Find(&tasks)
 	return tasks, res.Error
 }
 
@@ -74,13 +75,13 @@ func GetAllTasks() ([]Task, error) {
 
 func GetNumberOfOpenTasks() (int64, error) {
 	var numberOfOpenTasks int64
-	res := db.Model(&Task{}).Where("status = ?", 0).Count(&numberOfOpenTasks)
+	res := db.Model(&Task{}).Where("status = ?", bot.Created).Count(&numberOfOpenTasks)
 	return numberOfOpenTasks, res.Error
 }
 
 func GetNumberOfHoldTasks() (int64, error) {
 	var numberOfHoldTasks int64
-	res := db.Model(&Task{}).Where("status = ?", 2).Count(&numberOfHoldTasks)
+	res := db.Model(&Task{}).Where("status = ?", bot.NeedsClarification).Count(&numberOfHoldTasks)
 	return numberOfHoldTasks, res.Error
 }
 
@@ -92,7 +93,7 @@ func GetUserHistory(userId uint, countTasks int) ([]Task, error) {
 
 func GetUserActiveHistory(userId uint, countTasks int) ([]Task, error) {
 	var tasks []Task
-	res := db.Limit(countTasks).Where("user_id = ? AND status = ?", userId, 0).Or("user_id = ? AND status = ?", userId, 2).Order("created_at desc, room").Find(&tasks)
+	res := db.Limit(countTasks).Where("user_id = ? AND status = ?", userId, bot.Created).Or("user_id = ? AND status = ?", userId, bot.NeedsClarification).Order("created_at desc, room").Find(&tasks)
 	return tasks, res.Error
 }
 
