@@ -74,6 +74,7 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 func Start(key string, groupId int) {
 	vk := api.NewVK(key)
 	lp, err := longpoll.NewLongPoll(vk, groupId)
+	lp.Wait = 90
 	if err != nil {
 		panic(err)
 	}

@@ -14,7 +14,6 @@ type Task struct {
 }
 type Users struct {
 	UserID       int    `json:"user"`
-	Name         string `json:"name"`
 	LastMessages string `json:"lastMessages"`
 	Floor        int    `json:"floor"`
 	Room         string `json:"room"`

@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	created            uint = 0
+	Created            uint = 0
 	completed          uint = 1
-	needsClarification uint = 2
+	NeedsClarification uint = 2
 	canceled           uint = 3
 	canceledByUser     uint = 4
 )
@@ -91,6 +91,8 @@ func postFloor(vk *api.VK, message string, peerId int) string {
 }
 func changeStatus(vk *api.VK, message string, peerId int) string {
 	userHistory := getHistory(peerId)
+func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
+	userHistory := GetActiveHistory(PeerID)
 
 	for _, task := range userHistory.Tasks {
 		if strconv.Itoa(int(task.ID)) == message {
