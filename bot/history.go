@@ -3,22 +3,27 @@ package bot
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/object"
 	"ssummers02/Cookies/db"
 )
 
-func GetHistory(PeerID int) db.ArrayTask {
+func getHistory(peerId int) db.ArrayTask {
 	var userHistory db.ArrayTask
 
-	resp, err := http.Get("http://" + port + "/api/user/" + strconv.Itoa(PeerID) + "/5")
+	resp, err := http.Get("http://" + port + "/api/user/" + strconv.Itoa(peerId) + "/5")
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "history",
+			"func":    "getHistory",
+			"error":   err,
+		}).Warning("error get history")
 	}
 
 	defer resp.Body.Close()
@@ -26,7 +31,11 @@ func GetHistory(PeerID int) db.ArrayTask {
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "history",
+			"func":    "getHistory",
+			"error":   err,
+		}).Warning("error get history")
 	}
 	json.Unmarshal(body, &userHistory)
 
@@ -54,24 +63,23 @@ func GetActiveHistory(PeerID int) db.ArrayTask {
 	return userHistory
 }
 
-func PostHistoryForUser(vk *api.VK, PeerID int) {
-	userHistory := GetHistory(PeerID)
+func postHistoryForUser(vk *api.VK, peerId int) {
+	userHistory := getHistory(peerId)
 
 	if len(userHistory.Tasks) == 0 {
-		PostMessagesAndKeyboard(vk, PeerID, "Заказов нет", GetGeneralKeyboard(false))
+		postMessagesAndKeyboard(vk, peerId, "Заказов нет", getGeneralKeyboard(false))
 		return
 	}
 	for i := 0; i < len(userHistory.Tasks); i++ {
 		createMessage := "№" + strconv.Itoa(int(userHistory.Tasks[i].ID)) + ": " + userHistory.Tasks[i].Text + " - " + FindOutTheStatus(userHistory.Tasks[i].Status) + "\n"
-		PostMessagesAndKeyboard(vk, PeerID, createMessage, GetGeneralKeyboard(false))
+		postMessagesAndKeyboard(vk, peerId, createMessage, getGeneralKeyboard(false))
 	}
 }
-
-func SelectDeleteHistory(vk *api.VK, PeerID int) {
-	userHistory := GetActiveHistory(PeerID)
+func selectDeleteHistory(vk *api.VK, peerId int) {
+	userHistory := GetActiveHistory(peerId)
 
 	if len(userHistory.Tasks) == 0 {
-		PostMessagesAndKeyboard(vk, PeerID, "Заказов нет", GetGeneralKeyboard(false))
+		postMessagesAndKeyboard(vk, peerId, "Заказов нет", getGeneralKeyboard(false))
 		return
 	}
 	k := object.NewMessagesKeyboardInline()
@@ -81,11 +89,11 @@ func SelectDeleteHistory(vk *api.VK, PeerID int) {
 		id := strconv.Itoa(int(userHistory.Tasks[i].ID))
 		k.AddTextButton(id, ``, `primary`)
 		createMessage := "№" + id + ": " + userHistory.Tasks[i].Text + " - " + FindOutTheStatus(userHistory.Tasks[i].Status) + "\n"
-		PostAndSendMessages(vk, PeerID, createMessage)
+		postAndSendMessages(vk, peerId, createMessage)
 	}
 	k.AddRow()
 
 	k.AddTextButton(`Вернуться назад`, ``, `positive`)
 
-	PostMessagesAndKeyboard(vk, PeerID, "Выбери заказ который хочешь отменить", k)
+	postMessagesAndKeyboard(vk, peerId, "Выбери заказ который хочешь отменить", k)
 }

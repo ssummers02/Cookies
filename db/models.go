@@ -2,6 +2,14 @@ package db
 
 import "time"
 
+const (
+	Created            uint = 0
+	Completed          uint = 1
+	NeedsClarification uint = 2
+	Canceled           uint = 3
+	CanceledByUser     uint = 4
+)
+
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
 	UserID    uint   `json:"user"`

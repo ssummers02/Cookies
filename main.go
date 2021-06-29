@@ -26,9 +26,9 @@ func main() {
 	limit := os.Getenv("LIMIT")
 	vkKey := os.Getenv("VK_KEY")
 	vkGroup := os.Getenv("VK_GROUP_ID")
-	if _, err := os.Stat("temp"); os.IsNotExist(err) {
+	/*	if _, err := os.Stat("temp"); os.IsNotExist(err) {
 		os.Mkdir("temp", 0777)
-	}
+	}*/
 	lim, _ := strconv.Atoi(limit)
 	vkGroupId, _ := strconv.Atoi(vkGroup)
 	go func(vkKey string, vkGroupId int) {
@@ -45,9 +45,9 @@ func main() {
 	router.HandleFunc("/api/task/status/{task_id:[0-9]+}/{status:[0-9]+}", api.ChangeStatus).Methods("PUT")
 	router.HandleFunc("/api/task/floor/{user_id:[0-9]+}/{floor:[0-9]+}", api.ChangeFloor).Methods("PUT")
 
-	//router.HandleFunc("/", web.ShowActiveTasks).Methods("GET")
-	//router.HandleFunc("/all", web.ShowAllTasks).Methods("GET")
-	//router.HandleFunc("/settings", web.ShowSettings).Methods("GET")
+	// router.HandleFunc("/", web.ShowActiveTasks).Methods("GET")
+	// router.HandleFunc("/all", web.ShowAllTasks).Methods("GET")
+	// router.HandleFunc("/settings", web.ShowSettings).Methods("GET")
 
 	router.HandleFunc("/", web.ActiveTasksPage).Methods("GET")
 	router.HandleFunc("/alltasks", web.AllTasksPage).Methods("GET")

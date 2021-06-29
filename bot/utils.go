@@ -3,53 +3,53 @@ package bot
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/SevereCloud/vksdk/v2/api"
 	"github.com/SevereCloud/vksdk/v2/api/params"
 	"ssummers02/Cookies/db"
 )
 
-const (
-	Created            uint = 0
-	completed          uint = 1
-	NeedsClarification uint = 2
-	canceled           uint = 3
-	canceledByUser     uint = 4
-)
-
 func PostChangeStatus(userid int, taskid string, status string) {
 	vkKey := os.Getenv("VK_KEY")
 
 	vk := api.NewVK(vkKey)
-	PostAndSendMessages(vk, userid, "Заказ: "+taskid+"-"+status) // второй аргумент кому отдать изменение статуса
+	postAndSendMessages(vk, userid, "Заказ: '"+taskid+"' - "+status) // второй аргумент кому отдать изменение статуса
 }
 
-func PostNewTask(vk *api.VK, Message string, PeerID int, room string, floor int) {
-	emp := &db.Task{UserID: uint(PeerID), Name: GetName(vk, PeerID), Room: room, Text: Message, Floor: floor}
+func postNewTask(vk *api.VK, message string, peerId int, room string, floor int) {
+	emp := &db.Task{UserID: uint(peerId), Name: getName(vk, peerId), Room: room, Text: message, Floor: floor}
 	jsonData, _ := json.Marshal(emp)
 
 	_, err := http.Post("http://"+port+"/api/add_task", "application/json",
 		bytes.NewBuffer(jsonData))
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "utils",
+			"func":    "postNewTask",
+			"error":   err,
+		}).Warning("error post new task")
 	}
 }
 
-func GetName(vk *api.VK, PeerID int) string {
+func getName(vk *api.VK, peerId int) string {
 	b := params.NewUsersGetBuilder()
-	var id = []string{strconv.Itoa(PeerID)}
+	var id = []string{strconv.Itoa(peerId)}
 	b.UserIDs(id)
 
 	resp, err := vk.UsersGet(b.Params)
 
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "utils",
+			"func":    "getName",
+			"error":   err,
+		}).Warning("get name")
 	}
 	return resp[0].FirstName + " " + resp[0].LastName
 }
@@ -57,43 +57,48 @@ func GetName(vk *api.VK, PeerID int) string {
 func FindOutTheStatus(n uint) string {
 	switch n {
 	case 0:
-		return "создана"
+		return "создан"
 	case 1:
-		return "выполнена"
+		return "выполнен"
 	case 2:
 		return "требует уточнения"
 	case 3:
-		return "отклонена"
+		return "отклонён"
 	case 4:
-		return "отменена пользователем"
+		return "отменён пользователем"
 	}
 	return ""
 }
 
-func PostFloor(vk *api.VK, Message string, PeerID int) {
-	floor, err := strconv.Atoi(Message)
+func postFloor(vk *api.VK, message string, peerId int) string {
+	floor, err := strconv.Atoi(message)
 	if err != nil { // если возникла ошибка
-		PostAndSendMessages(vk, PeerID, "Неверный этаж, попробуй еще раз")
+		postAndSendMessages(vk, peerId, "Неверный этаж, попробуй еще раз")
+		return "Этаж"
 	} else {
-		PostMessagesAndKeyboard(vk, PeerID, "Твой этаж:"+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", GetGeneralKeyboard(true))
-		db.ChangeFloor(PeerID, floor)
+		postMessagesAndKeyboard(vk, peerId, "Твой этаж: "+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", getGeneralKeyboard(true))
+		db.ChangeFloor(peerId, floor)
 	}
+	return ""
 }
-func ChangeStatus(vk *api.VK, Message string, PeerID int) string {
-	userHistory := GetActiveHistory(PeerID)
-
+func changeStatus(vk *api.VK, message string, peerId int) string {
+	userHistory := GetActiveHistory(peerId)
 	for _, task := range userHistory.Tasks {
-		if strconv.Itoa(int(task.ID)) == Message {
-			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/status/"+Message+"/4", nil)
+		if strconv.Itoa(int(task.ID)) == message {
+			req, err := http.NewRequest(http.MethodPut, "http://"+port+"/api/task/status/"+message+"/4", nil)
 			if err != nil {
-				fmt.Println(err)
+				log.WithFields(log.Fields{
+					"package": "utils",
+					"func":    "changeStatus",
+					"error":   err,
+				}).Warning("change Status")
 			}
 			_, err = http.DefaultClient.Do(req)
-			PostMessagesAndKeyboard(vk, PeerID, "Твой заказ отменен", GetGeneralKeyboard(false))
-			return Message
+			postMessagesAndKeyboard(vk, peerId, "Твой заказ отменен", getGeneralKeyboard(false))
+			return message
 		}
 	}
-	PostMessagesAndKeyboard(vk, PeerID, "Этот заказ не может быть отменен", GetGeneralKeyboard(false))
+	postMessagesAndKeyboard(vk, peerId, "Этот заказ не может быть отменен", getGeneralKeyboard(false))
 
-	return Message
+	return message
 }
