@@ -1,0 +1,61 @@
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Заявки</h3></div>
+                    <div class="card-body">
+                        <table id="example1" class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th>Заявка</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                                <th>Этаж</th>
+                                <th>Кабинет</th>
+                                <th>Заявка</th>
+                                <th>Заказчик</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range .}}
+                            <tr>
+                                <td>{{.ID}}</td>
+                                <td><span class="badge badge-{{ if (eq .Status 0)}}info">Открыта{{ end }}{{ if (eq .Status 1)}}success">Выполнена{{ end }}{{ if (eq .Status 2)}}warning">Требует уточнения{{ end }}{{ if (eq .Status 3)}}danger">Отклонена{{ end }}{{ if (eq .Status 4)}}danger">Отменена{{ end }}</span></td>
+                                <td>{{.CreatedAt.Format "2006-01-02 15:04"}}</td>
+                                <td>{{.Floor}}</td>
+                                <td>{{.Room | escape}}</td>
+                                <td>{{.Text | escape}}</td>
+                                <td><a href="https://vk.com/id{{.UserID}}" target="_blank" rel="noopener noreferrer">{{.Name | escape}}</a></td>
+                                <td>
+                                    <div class="sparkbar" data-color="#00a65a" data-height="20">
+                                        <a title="Открыть" class="btn btn-{{ if or (eq .Status 0) (eq .Status 4)}}outline-{{ end }}info btn-sm{{ if or (eq .Status 0) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=0"><i class="fas fa-clipboard-list"></i></a>
+                                        <a title="Завершить" class="btn btn-{{ if or (eq .Status 1) (eq .Status 4)}}outline-{{ end }}success btn-sm{{ if or (eq .Status 1) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=1"><i class="fas fa-check"></i></a>
+                                        <a title="Уточнить" class="btn btn-{{ if or (eq .Status 2) (eq .Status 4)}}outline-{{ end }}warning btn-sm{{ if or (eq .Status 2) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=2"><i class="fas fa-question"></i></a>
+                                        <a title="Отклонить" class="btn btn-{{ if or (eq .Status 3) (eq .Status 4)}}outline-{{ end }}danger btn-sm{{ if or (eq .Status 3) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=3"><i class="fas fa-ban"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{end}}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <th>Заявка</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                                <th>Этаж</th>
+                                <th>Кабинет</th>
+                                <th>Заявка</th>
+                                <th>Заказчик</th>
+                                <th></th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

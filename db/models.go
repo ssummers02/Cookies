@@ -2,6 +2,21 @@ package db
 
 import "time"
 
+const (
+	Created            uint = 0
+	Completed          uint = 1
+	NeedsClarification uint = 2
+	Canceled           uint = 3
+	CanceledByUser     uint = 4
+)
+
+type StatusChangeAlert struct {
+	RecipientUserID int
+	TaskID          string
+	TaskText        string
+	Status          string
+}
+
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
 	UserID    uint   `json:"user"`
@@ -9,15 +24,14 @@ type Task struct {
 	Floor     int    `json:"floor"`
 	Room      string `json:"room"`
 	Text      string `json:"text"`
-	Status    uint   `json:"status"` // 1: New, 2: Done // Add if we have time for it)
+	Status    uint   `json:"status"`
 	CreatedAt time.Time
 }
 type Users struct {
 	UserID       int    `json:"user"`
-	Name         string `json:"name"`
-	LastMessages string `json:"LastMessages"`
+	LastMessages string `json:"lastMessages"`
 	Floor        int    `json:"floor"`
-	Room         string `json:"Room"`
+	Room         string `json:"room"`
 }
 
 type ArrayTask struct {

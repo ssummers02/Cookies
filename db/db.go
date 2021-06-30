@@ -4,23 +4,29 @@ import (
 	"fmt"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
-var limit int
-
-func InitDB(dbName string, lim int) {
+func InitDB(dbName string) {
 	var err error
 	db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	limit = lim
-	db.AutoMigrate(&Task{}, &Users{})
+	err = db.AutoMigrate(&Task{}, &Users{})
+	if err != nil {
+		log.WithFields(log.Fields{
+			"package": "db",
+			"func":    "InitDB",
+			"error":   err,
+		}).Error("err AutoMigrate")
+		return
+	}
 }
 
 func CreateTask(task Task) error {
@@ -60,10 +66,28 @@ func GetTask(id uint) (Task, error) {
 	return task, res.Error
 }
 
+func GetActiveTasks() ([]Task, error) {
+	var tasks []Task
+	res := db.Where("status = ?", Created).Or("status = ?", NeedsClarification).Order("created_at desc").Find(&tasks)
+	return tasks, res.Error
+}
+
 func GetAllTasks() ([]Task, error) {
 	var tasks []Task
-	res := db.Limit(limit).Order("created_at, room").Find(&tasks)
+	res := db.Order("created_at desc, room").Find(&tasks)
 	return tasks, res.Error
+}
+
+func GetNumberOfOpenTasks() (int64, error) {
+	var numberOfOpenTasks int64
+	res := db.Model(&Task{}).Where("status = ?", Created).Count(&numberOfOpenTasks)
+	return numberOfOpenTasks, res.Error
+}
+
+func GetNumberOfHoldTasks() (int64, error) {
+	var numberOfHoldTasks int64
+	res := db.Model(&Task{}).Where("status = ?", NeedsClarification).Count(&numberOfHoldTasks)
+	return numberOfHoldTasks, res.Error
 }
 
 func GetUserHistory(userId uint, countTasks int) ([]Task, error) {
@@ -72,9 +96,15 @@ func GetUserHistory(userId uint, countTasks int) ([]Task, error) {
 	return tasks, res.Error
 }
 
+func GetUserActiveHistory(userId uint, countTasks int) ([]Task, error) {
+	var tasks []Task
+	res := db.Limit(countTasks).Where("user_id = ? AND status = ?", userId, Created).Or("user_id = ? AND status = ?", userId, NeedsClarification).Order("created_at desc, room").Find(&tasks)
+	return tasks, res.Error
+}
+
 func GetTaskInRoom(room string) ([]Task, error) {
 	var tasks []Task
-	res := db.Limit(limit).Where("room = ?", room).Order("created_at, room").Find(&tasks)
+	res := db.Where("room = ?", room).Order("created_at desc").Find(&tasks)
 	return tasks, res.Error
 }
 
