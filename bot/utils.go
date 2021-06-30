@@ -57,15 +57,15 @@ func getName(vk *api.VK, peerId int) string {
 func FindOutTheStatus(n uint) string {
 	switch n {
 	case 0:
-		return "создан"
+		return "Открытый"
 	case 1:
-		return "выполнен"
+		return "Выполненный"
 	case 2:
-		return "требует уточнения"
+		return "Требует уточнения"
 	case 3:
-		return "отклонён"
+		return "Отклонённый"
 	case 4:
-		return "отменён пользователем"
+		return "Отменённый пользователем"
 	}
 	return ""
 }
