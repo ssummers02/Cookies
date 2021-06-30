@@ -14,11 +14,18 @@ import (
 	"ssummers02/Cookies/db"
 )
 
-func PostChangeStatus(userid int, taskid string, status string) {
-	vkKey := os.Getenv("VK_KEY")
+type StatusChangeAlert struct {
+	RecipientUserID int
+	TaskID          string
+	TaskText        string
+	Status          string
+}
 
+func PostChangeStatus(alert StatusChangeAlert) {
+	vkKey := os.Getenv("VK_KEY")
 	vk := api.NewVK(vkKey)
-	postAndSendMessages(vk, userid, "Заказ: '"+taskid+"' - "+status) // второй аргумент кому отдать изменение статуса
+	postAndSendMessages(vk, alert.RecipientUserID, "У заказа №"+alert.TaskID+"\n("+alert.TaskText+
+		")\nизменился статус на "+alert.Status) // второй аргумент кому отдать изменение статуса
 }
 
 func postNewTask(vk *api.VK, message string, peerId int, room string, floor int) {
@@ -76,8 +83,12 @@ func postFloor(vk *api.VK, message string, peerId int) string {
 		postAndSendMessages(vk, peerId, "Неверный этаж, попробуй еще раз")
 		return "Этаж"
 	} else {
+		err = db.ChangeFloor(peerId, floor)
+		if err != nil {
+			log.Print(err)
+			postMessagesAndKeyboard(vk, peerId, "Произошла ошибка, попробуйте повторить позже.\nЧем я могу тебе помочь?", getGeneralKeyboard(true))
+		}
 		postMessagesAndKeyboard(vk, peerId, "Твой этаж: "+strconv.Itoa(floor)+"\nЧем я могу тебе помочь?", getGeneralKeyboard(true))
-		db.ChangeFloor(peerId, floor)
 	}
 	return ""
 }

@@ -1,8 +1,10 @@
 package web
 
 import (
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"ssummers02/Cookies/db"
 	"text/template"
 )
 
@@ -65,4 +67,24 @@ func ActiveTasksPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
+}
+
+func ChangeStatusOnActiveTasksPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := db.ChangeStatus(vars["taskID"], vars["statusID"]); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	ActiveTasksPage(w, r)
+	sendChangeStatusAlert(vars["taskID"])
+}
+
+func ChangeStatusOnAllTasksPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	if err := db.ChangeStatus(vars["taskID"], vars["statusID"]); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	AllTasksPage(w, r)
+	sendChangeStatusAlert(vars["taskID"])
 }
