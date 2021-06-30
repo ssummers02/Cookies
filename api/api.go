@@ -18,7 +18,7 @@ type Response struct {
 	Tasks []db.Task
 }
 
-func GetTasksTable(w http.ResponseWriter) {
+func GetTasksTable(w http.ResponseWriter, _ *http.Request) {
 	tasks, err := db.GetAllTasks()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
