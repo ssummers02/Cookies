@@ -2,13 +2,14 @@ package web
 
 import (
 	"log"
+	"strconv"
+
 	"ssummers02/Cookies/bot"
 	"ssummers02/Cookies/db"
-	"strconv"
 )
 
 func sendChangeStatusAlert(taskID string) {
-	var alert bot.StatusChangeAlert
+	var alert db.StatusChangeAlert
 	var task db.Task
 	var err error
 	var taskIDInt int

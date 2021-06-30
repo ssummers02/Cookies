@@ -24,7 +24,7 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 		return "Этаж"
 	}
 	if userStatus.Room == "0" && userStatus.LastMessages != "Кабинет" {
-		postAndSendMessages(vk, peerId, "Я тебя не знаю, давай познакомимься поближе\nУкажи номер своего кабинета")
+		postAndSendMessages(vk, peerId, "Я тебя не знаю, давай познакомимся поближе\nУкажи номер своего кабинета")
 		return "Кабинет"
 	}
 	if userStatus.LastMessages == "Этаж" {

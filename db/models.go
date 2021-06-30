@@ -10,6 +10,12 @@ const (
 	CanceledByUser     uint = 4
 )
 
+type StatusChangeAlert struct {
+	RecipientUserID int
+	TaskID          string
+	TaskText        string
+	Status          string
+}
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
 	UserID    uint   `json:"user"`

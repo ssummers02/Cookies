@@ -14,14 +14,7 @@ import (
 	"ssummers02/Cookies/db"
 )
 
-type StatusChangeAlert struct {
-	RecipientUserID int
-	TaskID          string
-	TaskText        string
-	Status          string
-}
-
-func PostChangeStatus(alert StatusChangeAlert) {
+func PostChangeStatus(alert db.StatusChangeAlert) {
 	vkKey := os.Getenv("VK_KEY")
 	vk := api.NewVK(vkKey)
 	postAndSendMessages(vk, alert.RecipientUserID, "У заказа №"+alert.TaskID+"\n("+alert.TaskText+
