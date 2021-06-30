@@ -46,9 +46,9 @@ func main() {
 	router.HandleFunc("/api/task/floor/{user_id:[0-9]+}/{floor:[0-9]+}", api.ChangeFloor).Methods("PUT")
 
 	router.HandleFunc("/", web.ActiveTasksPage).Methods("GET")
-	router.HandleFunc("/?taskid={taskID:[0-9]+}&status={statusID:[0-9]+}", web.ChangeStatusOnActiveTasksPage).Methods("GET")
-	router.HandleFunc("/alltasks", web.AllTasksPage).Methods("GET")
-	router.HandleFunc("/alltasks?taskid={taskID:[0-9]+}&status={statusID:[0-9]+}", web.ChangeStatusOnAllTasksPage).Methods("GET")
+	router.HandleFunc("/id={taskID:[0-9]+}&status={statusID:[0-9]+}", web.ChangeStatusOnActiveTasksPage).Methods("GET")
+	router.HandleFunc("/alltasks/", web.AllTasksPage).Methods("GET")
+	router.HandleFunc("/alltasks/id={taskID:[0-9]+}&status={statusID:[0-9]+}", web.ChangeStatusOnAllTasksPage).Methods("GET")
 	router.PathPrefix("/plugins/").Handler(http.StripPrefix("/plugins/", http.FileServer(http.Dir("./web/assets/plugins"))))
 	router.PathPrefix("/dist/").Handler(http.StripPrefix("/dist/", http.FileServer(http.Dir("./web/assets/dist"))))
 

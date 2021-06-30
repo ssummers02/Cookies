@@ -31,10 +31,10 @@
                                 <td><a href="https://vk.com/id{{.UserID}}" target="_blank" rel="noopener noreferrer">{{.Name | escape}}</a></td>
                                 <td>
                                     <div class="sparkbar" data-color="#00a65a" data-height="20">
-                                        <a title="Открыть" class="btn btn-{{ if or (eq .Status 0) (eq .Status 4)}}outline-{{ end }}info btn-sm{{ if or (eq .Status 0) (eq .Status 4)}} disabled{{ end }}" href="?taskID={{.ID}}&statusID=0"><i class="fas fa-clipboard-list"></i></a>
-                                        <a title="Завершить" class="btn btn-{{ if or (eq .Status 1) (eq .Status 4)}}outline-{{ end }}success btn-sm{{ if or (eq .Status 1) (eq .Status 4)}} disabled{{ end }}" href="?taskID={{.ID}}&statusID=1"><i class="fas fa-check"></i></a>
-                                        <a title="Уточнить" class="btn btn-{{ if or (eq .Status 2) (eq .Status 4)}}outline-{{ end }}warning btn-sm{{ if or (eq .Status 2) (eq .Status 4)}} disabled{{ end }}" href="?taskID={{.ID}}&statusID=2"><i class="fas fa-question"></i></a>
-                                        <a title="Отклонить" class="btn btn-{{ if or (eq .Status 3) (eq .Status 4)}}outline-{{ end }}danger btn-sm{{ if or (eq .Status 3) (eq .Status 4)}} disabled{{ end }}" href="?taskID={{.ID}}&statusID=3"><i class="fas fa-ban"></i></a>
+                                        <a title="Открыть" class="btn btn-{{ if or (eq .Status 0) (eq .Status 4)}}outline-{{ end }}info btn-sm{{ if or (eq .Status 0) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=0"><i class="fas fa-clipboard-list"></i></a>
+                                        <a title="Завершить" class="btn btn-{{ if or (eq .Status 1) (eq .Status 4)}}outline-{{ end }}success btn-sm{{ if or (eq .Status 1) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=1"><i class="fas fa-check"></i></a>
+                                        <a title="Уточнить" class="btn btn-{{ if or (eq .Status 2) (eq .Status 4)}}outline-{{ end }}warning btn-sm{{ if or (eq .Status 2) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=2"><i class="fas fa-question"></i></a>
+                                        <a title="Отклонить" class="btn btn-{{ if or (eq .Status 3) (eq .Status 4)}}outline-{{ end }}danger btn-sm{{ if or (eq .Status 3) (eq .Status 4)}} disabled{{ end }}" href="id={{.ID}}&status=3"><i class="fas fa-ban"></i></a>
                                     </div>
                                 </td>
                             </tr>
