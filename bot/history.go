@@ -37,7 +37,14 @@ func getHistory(peerId int) db.ArrayTask {
 			"error":   err,
 		}).Warning("error get history")
 	}
-	json.Unmarshal(body, &userHistory)
+	err = json.Unmarshal(body, &userHistory)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"package": "history",
+			"func":    "getHistory",
+			"error":   err,
+		}).Warning("err json.Unmarshal")
+	}
 
 	return userHistory
 }
@@ -54,11 +61,22 @@ func GetActiveHistory(PeerID int) db.ArrayTask {
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-
 	if err != nil {
-		log.Fatal(err)
+		log.WithFields(log.Fields{
+			"package": "history",
+			"func":    "GetActiveHistory",
+			"error":   err,
+		}).Warning("err ioutil.ReadAll")
 	}
-	json.Unmarshal(body, &userHistory)
+
+	err = json.Unmarshal(body, &userHistory)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"package": "history",
+			"func":    "GetActiveHistory",
+			"error":   err,
+		}).Warning("err json.Unmarshal")
+	}
 
 	return userHistory
 }

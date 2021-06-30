@@ -19,7 +19,14 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 	userStatus, _ := db.GetUsers(peerId)
 
 	if userStatus.Room == "0" && userStatus.LastMessages == "Кабинет" {
-		db.ChangeRoom(peerId, message)
+		err := db.ChangeRoom(peerId, message)
+		if err != nil {
+			log.WithFields(log.Fields{
+				"package": "bot",
+				"func":    "message Handling",
+				"error":   err,
+			}).Warning("err ChangeRoom")
+		}
 		postAndSendMessages(vk, peerId, "Твой новый кабинет: "+message+"\nУкажи этаж")
 		return "Этаж"
 	}
@@ -35,8 +42,16 @@ func messageHandling(vk *api.VK, message string, peerId int) string {
 		return message
 	}
 	if message == "Изменить кабинет" {
-		db.ChangeRoom(peerId, "0")
-		db.ChangeFloor(peerId, 0)
+		err1 := db.ChangeRoom(peerId, "0")
+		err2 := db.ChangeFloor(peerId, 0)
+		if err1 != nil || err2 != nil {
+			log.WithFields(log.Fields{
+				"package": "bot",
+				"func":    "message Handling",
+				"error1":  err1,
+				"error2":  err2,
+			}).Warning("err ChangeRoom or ChangeFloor")
+		}
 		postAndSendMessages(vk, peerId, "Укажи номер своего кабинета")
 		return "Кабинет"
 	}
@@ -87,14 +102,28 @@ func Start(key string, groupId int) {
 
 		log.Printf("New messages: %d:%s", peerId, message)
 
-		_, err := db.GetUsers(peerId)
-		if err != nil {
-			db.CreateUsers(db.Users{UserID: peerId, Room: "0"})
+		_, er := db.GetUsers(peerId)
+		if er != nil {
+			err1 := db.CreateUsers(db.Users{UserID: peerId, Room: "0"})
+			if err1 != nil {
+				log.WithFields(log.Fields{
+					"package": "bot",
+					"func":    "Start",
+					"error":   err,
+				}).Warning("err CreateUsers")
+			}
 			postAndSendMessages(vk, peerId, "Привет! Я Печенька")
 		}
 
 		userFile := messageHandling(vk, message, peerId)
-		db.ChangeMessage(peerId, userFile)
+		err2 := db.ChangeMessage(peerId, userFile)
+		if err2 != nil {
+			log.WithFields(log.Fields{
+				"package": "bot",
+				"func":    "Start",
+				"error":   err,
+			}).Warning("err ChangeMessage")
+		}
 
 	})
 

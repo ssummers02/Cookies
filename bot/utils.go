@@ -18,7 +18,7 @@ func PostChangeStatus(alert db.StatusChangeAlert) {
 	vkKey := os.Getenv("VK_KEY")
 	vk := api.NewVK(vkKey)
 	postAndSendMessages(vk, alert.RecipientUserID, "У заказа №"+alert.TaskID+"\n("+alert.TaskText+
-		")\nизменился статус на "+alert.Status) // второй аргумент кому отдать изменение статуса
+		")\nизменился статус на "+alert.Status)
 }
 
 func postNewTask(vk *api.VK, message string, peerId int, room string, floor int) {
@@ -72,7 +72,7 @@ func FindOutTheStatus(n uint) string {
 
 func postFloor(vk *api.VK, message string, peerId int) string {
 	floor, err := strconv.Atoi(message)
-	if err != nil { // если возникла ошибка
+	if err != nil {
 		postAndSendMessages(vk, peerId, "Неверный этаж, попробуй еще раз")
 		return "Этаж"
 	} else {
@@ -98,7 +98,6 @@ func changeStatus(vk *api.VK, message string, peerId int) string {
 				}).Warning("change Status")
 			}
 			_, err = http.DefaultClient.Do(req)
-			postMessagesAndKeyboard(vk, peerId, "Твой заказ отменен", getGeneralKeyboard(false))
 			return message
 		}
 	}

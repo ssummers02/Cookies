@@ -16,6 +16,7 @@ type StatusChangeAlert struct {
 	TaskText        string
 	Status          string
 }
+
 type Task struct {
 	ID        uint   `gorm:"primaryKey"`
 	UserID    uint   `json:"user"`
@@ -23,7 +24,7 @@ type Task struct {
 	Floor     int    `json:"floor"`
 	Room      string `json:"room"`
 	Text      string `json:"text"`
-	Status    uint   `json:"status"` // 1: New, 2: Done // Add if we have time for it)
+	Status    uint   `json:"status"`
 	CreatedAt time.Time
 }
 type Users struct {

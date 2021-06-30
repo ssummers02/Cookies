@@ -4,23 +4,29 @@ import (
 	"fmt"
 	"time"
 
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var db *gorm.DB
 
-var limit int
-
-func InitDB(dbName string, lim int) {
+func InitDB(dbName string) {
 	var err error
 	db, err = gorm.Open(sqlite.Open(dbName), &gorm.Config{})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	limit = lim
-	db.AutoMigrate(&Task{}, &Users{})
+	err = db.AutoMigrate(&Task{}, &Users{})
+	if err != nil {
+		log.WithFields(log.Fields{
+			"package": "db",
+			"func":    "InitDB",
+			"error":   err,
+		}).Error("err AutoMigrate")
+		return
+	}
 }
 
 func CreateTask(task Task) error {
