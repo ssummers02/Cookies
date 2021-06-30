@@ -76,6 +76,7 @@ func ChangeStatusOnActiveTasksPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ActiveTasksPage(w, r)
+	sendChangeStatusAlert(vars["taskID"])
 }
 
 func ChangeStatusOnAllTasksPage(w http.ResponseWriter, r *http.Request) {
@@ -85,4 +86,5 @@ func ChangeStatusOnAllTasksPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	AllTasksPage(w, r)
+	sendChangeStatusAlert(vars["taskID"])
 }
